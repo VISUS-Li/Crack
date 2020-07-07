@@ -5,6 +5,8 @@
 #include <QFile>
 #include <QAxObject>
 #include <QStandardItemModel>
+#include <QDebug>
+#include <QThread>
 
 namespace Ui {
     class YiPlusMain;
