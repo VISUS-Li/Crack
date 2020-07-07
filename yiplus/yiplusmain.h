@@ -20,19 +20,16 @@ private:
     Ui::YiPlusMain *ui;
     QFile *File_Account;
     QFile *File_RequestLog;
-    QAxObject *ExcelObj;
     QString FileAccoutnPath;
     QStandardItemModel *LogListItem;
-    QString DefaultExcelPath;
+
     bool InitAccounts();
-    bool InitExcel();
-    void AppendLog(QString item);
-    bool IsFilorDirExist(QString path);
 
 signals:
 
 private slots:
     void on_Btn_AddAccount_clicked();
 };
+
 
 #endif // YIPLUSMAIN_H

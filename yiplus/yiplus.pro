@@ -17,13 +17,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    excelengine.cpp \
+    excelnode.cpp \
     main.cpp \
     mainwidget.cpp \
+    util.cpp \
     widget.cpp \
     yiplusmain.cpp
 
 HEADERS += \
+    excelengine.h \
+    excelnode.h \
     mainwidget.h \
+    util.h \
     widget.h \
     yiplusmain.h
 
