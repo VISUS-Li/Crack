@@ -1,3 +1,4 @@
+
 #ifndef YIPLUSMAIN_H
 #define YIPLUSMAIN_H
 
@@ -5,6 +6,8 @@
 #include <QFile>
 #include <QAxObject>
 #include <QStandardItemModel>
+#include <QDebug>
+#include <QThread>
 #include "account.h"
 
 namespace Ui {

@@ -1,3 +1,4 @@
+
 #include "yiplusmain.h"
 #include "ui_YiPlusMain.h"
 #include <QErrorMessage>
@@ -15,6 +16,22 @@ YiPlusMain::YiPlusMain(QWidget *parent) : QWidget(parent)
         ui->List_Logs->setModel(LogListItem);
     }
     LogHelper::Instance()->SetLogListModel(LogListItem);
+
+    QStringList tableHeader;
+    tableHeader << "账号" << "会员ID" << "密码" << "token";
+
+    /*tableHeader << QString::fromLocal8Bit("账号")\
+                << QString::fromLocal8Bit("会员ID")\
+                << QString::fromLocal8Bit("密码")\
+                << QString::fromLocal8Bit("token");
+    */
+    ui->Table_AllAccount->horizontalHeader()->setDefaultSectionSize(180);
+    ui->Table_AllAccount->setColumnCount(4);
+    ui->Table_AllAccount->setHorizontalHeaderLabels(tableHeader);
+    ui->Table_AllAccount->verticalHeader()->setVisible(false);
+    ui->Table_AllAccount->setShowGrid(false);
+    ui->Table_AllAccount->horizontalHeader()->setStyleSheet("QHeaderView::section{background::skyblue;}");
+    ui->Table_AllAccount->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 YiPlusMain::~YiPlusMain(){
