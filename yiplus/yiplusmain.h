@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QAxObject>
 #include <QStandardItemModel>
+#include "account.h"
 
 namespace Ui {
     class YiPlusMain;

@@ -15,6 +15,7 @@ YiPlusMain::YiPlusMain(QWidget *parent) : QWidget(parent)
         ui->List_Logs->setModel(LogListItem);
     }
     LogHelper::Instance()->SetLogListModel(LogListItem);
+    
 }
 
 YiPlusMain::~YiPlusMain(){
