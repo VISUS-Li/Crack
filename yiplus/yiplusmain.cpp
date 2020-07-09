@@ -32,6 +32,8 @@ YiPlusMain::YiPlusMain(QWidget *parent) : QWidget(parent)
     ui->Table_AllAccount->setShowGrid(false);
     ui->Table_AllAccount->horizontalHeader()->setStyleSheet("QHeaderView::section{background::skyblue;}");
     ui->Table_AllAccount->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    QList<Account> NewAccount;
+    CommonUtils::Instance()->ImportAccount("C:\\Users\\liningtao\\Desktop\\account.txt",&NewAccount);
 }
 
 YiPlusMain::~YiPlusMain(){
