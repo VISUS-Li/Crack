@@ -33,6 +33,9 @@ YiPlusMain::YiPlusMain(QWidget *parent) : QWidget(parent)
     ui->Table_AllAccount->setEditTriggers(QAbstractItemView::NoEditTriggers);
     QList<Account> NewAccount;
     CommonUtils::Instance()->ImportAccount("C:\\Users\\liningtao\\Desktop\\account.txt",&NewAccount);
+    int iRow = ui->Table_AllAccount->rowCount();
+    ui->Table_AllAccount->insertRow(iRow+1);
+    //ui->Table_AllAccount->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 YiPlusMain::~YiPlusMain(){
