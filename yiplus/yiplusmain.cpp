@@ -1,4 +1,3 @@
-
 #include "yiplusmain.h"
 #include "ui_YiPlusMain.h"
 #include <QErrorMessage>
@@ -80,8 +79,21 @@ void YiPlusMain::on_Btn_AddAccount_clicked()
 }
 
 
+void YiPlusMain::on_Btn_StartRob_clicked()
+{
+    memberInfo_t *memberInfo = new memberInfo_t;
+    /*
+    memberInfo->userID = ui->Table_AllAccount->item(1,0)->text();
+    memberInfo->memberID = ui->Table_AllAccount->item(1,1)->text();
+    memberInfo->passWord = ui->Table_AllAccount->item(1,2)->text();
+    memberInfo->token = ui->Table_AllAccount->item(1,3)->text();
+    */
+    memberInfo->userID = "15002326234";
+    memberInfo->memberID = "9520017000830";
+    memberInfo->passWord = "GCN0kn9VEM5pc7zPakk2YA==";
+    //memberInfo->token = ui->Table_AllAccount->item(1,3)->text();
 
+    changeThread *myThread = new changeThread(memberInfo);
 
-
-
-
+    myThread->start();
+}

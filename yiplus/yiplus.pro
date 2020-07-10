@@ -18,6 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     account.cpp \
+    changethread.cpp \
     main.cpp \
     mainwidget.cpp \
     qaesencryption.cpp \
@@ -27,6 +28,8 @@ SOURCES += \
 
 HEADERS += \
     account.h \
+    changethread.h \
+    common.h \
     mainwidget.h \
     qaesencryption.h \
     util.h \

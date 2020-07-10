@@ -8,7 +8,10 @@
 #include <QStandardItemModel>
 #include <QDebug>
 #include <QThread>
+
+#include "changethread.h"
 #include "account.h"
+#include "common.h"
 
 namespace Ui {
     class YiPlusMain;
@@ -27,12 +30,15 @@ private:
     QString FileAccoutnPath;
     QStandardItemModel *LogListItem;
 
+    memberInfo_t *memberInfo;
+
     bool InitAccounts();
 
 signals:
 
 private slots:
     void on_Btn_AddAccount_clicked();
+    void on_Btn_StartRob_clicked();
 };
 
 

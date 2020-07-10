@@ -14,16 +14,21 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
+#include "common.h"
+
 class changeThread : public QThread
 {
+    Q_OBJECT
 public:
-    changeThread(QTableWidget *, int );
+    changeThread(memberInfo_t *memInfo);
     bool returnURLCheck(QJsonDocument );
 
 private:
     QTableWidget *table;
     int currentRow;
-    QString userID, memberID, passWord, token;
+    QString userID, memberID, passWord, token, changeList,detail, change;
+
+    bool requestRet = false, changeRet = false;
 
     QJsonDocument logInReturn;
     QJsonDocument homePageReturn;
@@ -32,12 +37,19 @@ private:
     QJsonDocument exchangeGoodReturn;
 
     void signIN();
+    void getHomePage();
+    void getGoodsList();
+    void getGoodsInfo();
+    void changeGoods();
 
 private slots:
+    void replyFinished(QNetworkReply*);
     void replyHomePage(QNetworkReply*);
     void replyGoodsList(QNetworkReply *);
     void replyGoodInfo(QNetworkReply *);
-    void replyGoodChange(QNetworkReply *);
+    void replyGoodChange(QNetworkReply *reply);
+    void on_readyRead();
+
 
 protected:
     void run();
