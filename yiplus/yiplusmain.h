@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 #ifndef YIPLUSMAIN_H
 #define YIPLUSMAIN_H

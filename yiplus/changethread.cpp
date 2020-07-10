@@ -60,16 +60,17 @@ void changeThread::changeGoods()
 void changeThread::signIN()
 {
     /* create url */
-    QString param = logInURL;
-    param = param + "phoneNumber=" + userID + "&";
-    param = param + "password=" + "GCN0kn9VEM5pc7zPakk2YA==";
+
+    logInURL = logInURL + "phoneNumber=" + userID + "&";
+    logInURL = logInURL + "password=" + "GCN0kn9VEM5pc7zPakk2YA==";
 
 
 
-    qDebug() << "logInURL" << param;
+    qDebug() << "logInURL" << logInURL;
 
     //create url request
-    QNetworkRequest request(param);
+    QNetworkRequest request(logInURL);
+
     QHttpMultiPart *multi_part = new QHttpMultiPart(QHttpMultiPart::FormDataType);
     QHttpPart *formdata = new QHttpPart;
     formdata->setHeader(QNetworkRequest::ContentDispositionHeader,
@@ -80,7 +81,11 @@ void changeThread::signIN()
     QNetworkReply *reply = netWorkManager->post(request, multi_part);
 
     //连接请求结束信号
+
     connect(netWorkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)),Qt::DirectConnection);
+
+    //connect(netWorkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
+
     //连接响应时返回数据信号
     connect(reply, SIGNAL(readyRead()), this, SLOT(on_readyRead()));
 }
@@ -88,7 +93,9 @@ void changeThread::signIN()
 
 void changeThread::replyFinished(QNetworkReply *reply)
 {
+
     qDebug() << "登录请求返回";
+
     QByteArray data = reply->readAll();
 
     QJsonParseError json_error;
@@ -140,10 +147,17 @@ void changeThread::getHomePage()
        QString paramURl = \
        QString("start=0&length=15&store=001&memberid=%1&memberId=%2&mobile=%3&token=%4&language=zh")\
                .arg(memberID).arg(memberID).arg(userID).arg(token);
-       QString homePage = homePageURL;
-       homePage = homePage + paramURl;
 
-       QNetworkRequest request(homePage);
+//       QString homePage = homePageURL;
+//       homePage = homePage + paramURl;
+
+//       QNetworkRequest request(homePage);
+
+
+       homePageURL = homePageURL + paramURl;
+
+       QNetworkRequest request(homePageURL);
+
        QHttpMultiPart *multi_part = new QHttpMultiPart(QHttpMultiPart::FormDataType);
        QHttpPart *formdata = new QHttpPart;
 
@@ -162,11 +176,31 @@ void changeThread::getHomePage()
 
 void changeThread::replyHomePage(QNetworkReply *reply)
 {
+
     qDebug() << "请求主页返回";
+
     QByteArray data = reply->readAll();
 
         QJsonParseError json_error;
         QJsonDocument document = QJsonDocument::fromJson(data, &json_error);
+
+//        if(json_error.error == QJsonParseError::NoError)
+//        {
+//            qDebug() << document;
+//            if(document.isObject())
+//            {
+//                QJsonObject obj = document.object();
+//                //解析反馈请求结果
+//                if(obj.contains("flag")) {
+//                     bool flag = obj.take("flag").toBool();
+//                     qDebug() << "主页请求返回结果：" << flag;
+//                     if ( true != flag) {
+//                         return;
+//                     } else  {
+//                        homePageReturn = document;
+//                        qDebug() << homePageReturn;
+
+
 
         if(json_error.error == QJsonParseError::NoError)
         {
@@ -203,7 +237,6 @@ void changeThread::replyHomePage(QNetworkReply *reply)
 
 void changeThread::getGoodsList()
 {
-    qDebug()<<"请求商品列表";
     QNetworkAccessManager *goodsListManager = new QNetworkAccessManager(this);
         QString paramURl = \
         QString("giftKbn=-1&orderBy=3&storeCode=001&memberid=%1&memberId=%2&mobile=%3&token=%4&language=zh&store=001")\
@@ -230,7 +263,6 @@ void changeThread::getGoodsList()
 
 void changeThread::replyGoodsList(QNetworkReply *reply)
 {
-    qDebug()<<"请求商品列表返回";
     QByteArray data = reply->readAll();
 
         QJsonParseError json_error;
@@ -273,7 +305,6 @@ void changeThread::replyGoodsList(QNetworkReply *reply)
 
 void changeThread::getGoodsInfo()
 {
-    qDebug()<<"请求商品信息";
     QNetworkAccessManager *goodInfoManager = new QNetworkAccessManager(this);
         //测试，获取指甲钳商品详细信息
         QString paramURl = \
@@ -303,7 +334,6 @@ void changeThread::getGoodsInfo()
 
 void changeThread::replyGoodInfo(QNetworkReply *reply)
 {
-    qDebug()<<"请求商品信息返回";
     QByteArray data = reply->readAll();
 
        QJsonParseError json_error;
@@ -347,7 +377,6 @@ void changeThread::replyGoodInfo(QNetworkReply *reply)
 
 void changeThread::replyGoodChange(QNetworkReply *reply)
 {
-    qDebug()<<"请求兑换商品";
     QByteArray data = reply->readAll();
 
     QJsonParseError json_error;
@@ -375,6 +404,181 @@ void changeThread::replyGoodChange(QNetworkReply *reply)
         }
     }
 }
+
+//void changeThread::getGoodsList()
+//{
+//    qDebug()<<"请求商品列表";
+//    QNetworkAccessManager *goodsListManager = new QNetworkAccessManager(this);
+//        QString paramURl = \
+//        QString("giftKbn=-1&orderBy=3&storeCode=001&memberid=%1&memberId=%2&mobile=%3&token=%4&language=zh&store=001")\
+//                .arg(memberID).arg(memberID).arg(userID).arg(token);
+//        QString homeCtrlURL = CtrlURL;
+//        homeCtrlURL = homeCtrlURL + changeList + "?";
+//        homeCtrlURL = homeCtrlURL + paramURl;
+
+//        QNetworkRequest request(homeCtrlURL);
+//        QHttpMultiPart *multi_part = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+//        QHttpPart *formdata = new QHttpPart;
+
+//        formdata->setHeader(QNetworkRequest::ContentDispositionHeader,
+//                            QVariant(QString("form-data; giftKbn=\"-1\";orderBy=\"3\";storeCode=\"001\";memberid=\"%1\";memberid=\"%2\"; mobile=\"%3\";token=\"%4\";language=\"zh\";store=\"001\";")\
+//                                     .arg(memberID).arg(memberID).arg(userID).arg(token)));
+//         multi_part->append(*formdata);
+//         QNetworkReply *reply = goodsListManager->get(request);
+
+//         //连接请求结束信号
+//         connect(goodsListManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyGoodsList(QNetworkReply*)));
+//         //连接响应时返回数据信号
+//         connect(reply, SIGNAL(readyRead()), this, SLOT(on_readyRead()));
+//}
+
+//void changeThread::replyGoodsList(QNetworkReply *reply)
+//{
+//    qDebug()<<"请求商品列表返回";
+//    QByteArray data = reply->readAll();
+
+//        QJsonParseError json_error;
+//        QJsonDocument document = QJsonDocument::fromJson(data, &json_error);
+
+//        if(json_error.error == QJsonParseError::NoError)
+//        {
+//            qDebug() << document;
+//            if(document.isObject())
+//            {
+//                QJsonObject obj = document.object();
+//                //解析反馈请求结果
+//                if(obj.contains("flag"))
+//                {
+//                     bool flag = obj.take("flag").toBool();
+//                     qDebug() << "商品列表请求返回结果：" << flag;
+//                     if ( true != flag) {
+//                         return;
+//                     } else  {
+//                        goodsListReturn = document;
+//                        qDebug() << goodsListReturn;
+
+//                     }
+//                }
+//                if( obj.contains("result") ) {
+//                    QJsonObject resultObj = obj.take("result").toObject();
+//                    if( resultObj.contains("nextRoad") ) {
+//                        QJsonObject nextRoadObj = resultObj.take("nextRoad").toObject();
+//                        if( nextRoadObj.contains("detail") ) {
+//                            detail = nextRoadObj.take("detail").toString();
+//                        }
+//                    }
+
+//                }
+//            }
+//        }
+//        getGoodsInfo();
+//}
+
+
+//void changeThread::getGoodsInfo()
+//{
+//    qDebug()<<"请求商品信息";
+//    QNetworkAccessManager *goodInfoManager = new QNetworkAccessManager(this);
+//        //测试，获取指甲钳商品详细信息
+//        QString paramURl = \
+//        QString("recordid=535&level=1&storeId=001&goodsId=585&eid=978&pikeId=&isspike=0&memberid=%1&memberId=%2&mobile=%3&token=%4&language=zh&store=001")\
+//                .arg(memberID).arg(memberID).arg(userID).arg(token);
+//        QString homeCtrlURL = CtrlURL;
+//        homeCtrlURL = homeCtrlURL + detail + "?";
+//        homeCtrlURL = homeCtrlURL + paramURl;
+
+//        QNetworkRequest request(homeCtrlURL);
+//        QHttpMultiPart *multi_part = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+//        QHttpPart *formdata = new QHttpPart;
+
+//        formdata->setHeader(QNetworkRequest::ContentDispositionHeader,
+//                            QVariant(QString("recordid=\"218\";level=\"1\";storeId=\"001\";goodsId=\"467\";eid=\"544\";pikeId=\"\";isspike=\"2\";memberid=\"%1\""
+//                                             "memberid=\"%2\";mobile=\"%3\";token=\"%4\";language=\"zh\";store=\"001\";")\
+//                                     .arg(memberID).arg(memberID).arg(userID).arg(token)));
+
+//         multi_part->append(*formdata);
+//         QNetworkReply *reply = goodInfoManager->post(request, multi_part);
+
+//         //连接请求结束信号
+//         connect(goodInfoManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyGoodInfo(QNetworkReply*)));
+//         //连接响应时返回数据信号
+//         connect(reply, SIGNAL(readyRead()), this, SLOT(on_readyRead()));
+//}
+
+//void changeThread::replyGoodInfo(QNetworkReply *reply)
+//{
+//    qDebug()<<"请求商品信息返回";
+//    QByteArray data = reply->readAll();
+
+//       QJsonParseError json_error;
+//       QJsonDocument document = QJsonDocument::fromJson(data, &json_error);
+
+//       if(json_error.error == QJsonParseError::NoError)
+//       {
+
+//           qDebug() << document;
+//           if(document.isObject())
+//           {
+//               QJsonObject obj = document.object();
+//               //解析反馈请求结果
+//               if(obj.contains("flag"))
+//               {
+//                    bool flag = obj.take("flag").toBool();
+//                    qDebug() << "商品详细信息请求返回结果：" << flag;
+//                    if ( true != flag) {
+
+//                        return;
+//                    } else  {
+//                       goodInfoReturn = document;
+//                       qDebug() << goodInfoReturn;
+
+//                       if( obj.contains("result") ) {
+//                           QJsonObject resultObj = obj.take("result").toObject();
+//                           if( resultObj.contains("nextRoad") ) {
+//                               QJsonObject nextRoadObj = resultObj.take("nextRoad").toObject();
+//                               if( nextRoadObj.contains("change") ) {
+//                                   change = nextRoadObj.take("change").toString();
+//                               }
+//                           }
+
+//                       }
+//                    }
+//               }
+//           }
+//       }
+//       requestRet = true;
+//}
+
+//void changeThread::replyGoodChange(QNetworkReply *reply)
+//{
+//    qDebug()<<"请求兑换商品";
+//    QByteArray data = reply->readAll();
+
+//    QJsonParseError json_error;
+//    QJsonDocument document = QJsonDocument::fromJson(data, &json_error);
+
+//    if(json_error.error == QJsonParseError::NoError)
+//    {
+//        qDebug() << document;
+//        if(document.isObject())
+//        {
+//            QJsonObject obj = document.object();
+//            //解析反馈请求结果
+//            if(obj.contains("flag"))
+//            {
+//                 bool flag = obj.take("flag").toBool();
+//                 qDebug() << "登录请求返回结果：" << flag;
+//                 if ( true != flag) {
+//                     changeRet = false;
+//                     return;
+//                 } else  {
+//                    changeRet = true;
+//                    return;
+//                 }
+//            }
+//        }
+//    }
+//}
 
 
 void changeThread::on_readyRead()
