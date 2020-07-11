@@ -19,11 +19,6 @@ YiPlusMain::YiPlusMain(QWidget *parent) : QWidget(parent)
     QStringList tableHeader;
     tableHeader << "账号" << "会员ID" << "密码" << "token";
 
-    /*tableHeader << QString::fromLocal8Bit("账号")\
-                << QString::fromLocal8Bit("会员ID")\
-                << QString::fromLocal8Bit("密码")\
-                << QString::fromLocal8Bit("token");
-    */
     ui->Table_AllAccount->horizontalHeader()->setDefaultSectionSize(180);
     ui->Table_AllAccount->setColumnCount(4);
     ui->Table_AllAccount->setHorizontalHeaderLabels(tableHeader);
@@ -31,11 +26,11 @@ YiPlusMain::YiPlusMain(QWidget *parent) : QWidget(parent)
     ui->Table_AllAccount->setShowGrid(false);
     ui->Table_AllAccount->horizontalHeader()->setStyleSheet("QHeaderView::section{background::skyblue;}");
     ui->Table_AllAccount->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    QList<Account> NewAccount;
-    CommonUtils::Instance()->ImportAccount("C:\\Users\\liningtao\\Desktop\\account.txt",&NewAccount);
     int iRow = ui->Table_AllAccount->rowCount();
     ui->Table_AllAccount->insertRow(iRow+1);
     //ui->Table_AllAccount->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    OnInit();
 }
 
 YiPlusMain::~YiPlusMain(){
@@ -50,25 +45,11 @@ YiPlusMain::~YiPlusMain(){
     }
 }
 
-bool YiPlusMain::InitAccounts(){
-    ////创建或打开账户列表文件
-    QString qexeFullPath = QCoreApplication::applicationDirPath();
-    FileAccoutnPath = qexeFullPath + "accounts.txt";
-    File_Account = new QFile(FileAccoutnPath);
-    //文件不存在则创建
-    if(!File_Account->exists(FileAccoutnPath)){
-        if(!File_Account->open(QIODevice::ReadWrite | QIODevice::Append | QIODevice::Text)){
-            QString msg = "打开accoutns.txt文件失败，路径为:"+FileAccoutnPath;
-            QMessageBox::warning(NULL,"打开文件",msg);
-        }
-        File_Account->close();
-    }
-    if(!File_Account->open(QIODevice::ReadWrite | QIODevice::Append | QIODevice::Text)){
-        QString msg = "打开accoutns.txt文件失败，路径为:"+FileAccoutnPath;
-        QMessageBox::warning(NULL,"打开文件",msg);
-    }
-}
+void YiPlusMain::OnInit(){
+    QString accPath = CommonUtils::Instance()->GetExePath("account.txt");
+    CommonUtils::Instance()->ImportAccount(accPath,&Accounts);
 
+}
 
 void YiPlusMain::on_Btn_AddAccount_clicked()
 {
@@ -84,19 +65,16 @@ void YiPlusMain::on_Btn_AddAccount_clicked()
 
 void YiPlusMain::on_Btn_StartRob_clicked()
 {
-    memberInfo_t *memberInfo = new memberInfo_t;
-    /*
-    memberInfo->userID = ui->Table_AllAccount->item(1,0)->text();
-    memberInfo->memberID = ui->Table_AllAccount->item(1,1)->text();
-    memberInfo->passWord = ui->Table_AllAccount->item(1,2)->text();
-    memberInfo->token = ui->Table_AllAccount->item(1,3)->text();
-    */
-    memberInfo->userID = "15002326234";
-    memberInfo->memberID = "9520017000830";
-    memberInfo->passWord = "GCN0kn9VEM5pc7zPakk2YA==";
-    //memberInfo->token = ui->Table_AllAccount->item(1,3)->text();
+    for(int i = 0; i < Accounts.size(); i++){
+        memberInfo_t *memberInfo = new memberInfo_t;
+        memberInfo->userID = Accounts[i].GetPoneNumber();
+        memberInfo->passWord = Accounts[i].GetPassWord();
+        memberInfo->store = Accounts[i].GetStore();
+        changeThread *myThread = new changeThread(memberInfo);
+        ThreadPool.push_back(myThread);
 
-    changeThread *myThread = new changeThread(memberInfo);
+        myThread->start();
+    }
 
-    myThread->start();
+
 }

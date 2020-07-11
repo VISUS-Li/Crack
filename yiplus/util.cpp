@@ -12,9 +12,7 @@ ExcelHelper *ExcelHelper::m_Excel = NULL;
 CommonUtils::CommonUtils()
 {
     DefualtFile = NULL;
-    QString qexeFullPath = QCoreApplication::applicationDirPath();
-    defAccDocPath = qexeFullPath + "/account.txt";
-    defAccDocPath =  QDir::toNativeSeparators(defAccDocPath);
+    defAccDocPath = GetExePath("account.txt");
 }
 
 void CommonUtils::Relese(){
@@ -33,6 +31,14 @@ bool CommonUtils::IsFilorDirExist(QString path){
     }else{
         return false;
     }
+}
+QString CommonUtils::GetExePath(QString fileName){
+    QString qexeFullPath = QCoreApplication::applicationDirPath();
+    if(fileName != ""){
+        qexeFullPath = qexeFullPath + "/"+fileName;
+    }
+    qexeFullPath =  QDir::toNativeSeparators(qexeFullPath);
+    return qexeFullPath;
 }
 
 bool CommonUtils::ImportAccount(QString filePath, QList<Account> *accountList){
@@ -61,7 +67,7 @@ bool CommonUtils::ImportAccount(QString filePath, QList<Account> *accountList){
     for(int i = 0; i < allAccountList.count(); i++){
         QString accountStr = allAccountList[i];
         QStringList splitAccount = accountStr.split(",",QString::SkipEmptyParts);
-        Account newAccount(splitAccount[0],splitAccount[1]);
+        Account newAccount(splitAccount[0],splitAccount[1],"001");
         accountList->push_back(newAccount);
         InsertDefAccountDoc(newAccount);
         LogHelper::Instance()->AppendLogList(splitAccount[0]+"-"+splitAccount[1]);
@@ -115,7 +121,7 @@ QJsonObject CommonUtils::GetJsonObject(QString JsonStr){
 }
 
 
-bool CommonUtils::ParseLoginJson(QString loginStr){
+bool CommonUtils::ParseLoginJson(QString loginStr, JsonClass& ReplayJson){
     QJsonObject loginObj = GetJsonObject(loginStr);
     if(loginObj.keys().count() <= 0){
         return false;
@@ -145,7 +151,7 @@ bool CommonUtils::ParseLoginJson(QString loginStr){
     return true;
 }
 
-bool CommonUtils::ParseHomePageJson(QString homeStr){
+bool CommonUtils::ParseHomePageJson(QString homeStr,JsonClass& ReplayJson){
     QJsonObject homeObj = GetJsonObject(homeStr);
     if(homeObj.keys().count() <= 0){
         return false;
@@ -183,7 +189,7 @@ bool CommonUtils::ParseHomePageJson(QString homeStr){
     return true;
 }
 
-bool CommonUtils::ParseGoodListsJson(QString goodsListStr){
+bool CommonUtils::ParseGoodListsJson(QString goodsListStr, JsonClass& ReplayJson){
     QJsonObject GoodsObj = GetJsonObject(goodsListStr);
     if(GoodsObj.keys().count() <= 0){
         return false;
@@ -270,7 +276,7 @@ bool CommonUtils::ParseGoodListsJson(QString goodsListStr){
     return true;
 }
 
-bool CommonUtils::ParseGoodItemJson(QString goodItemStr){
+bool CommonUtils::ParseGoodItemJson(QString goodItemStr, JsonClass& ReplayJson){
     QJsonObject itemObj = GetJsonObject(goodItemStr);
     if(itemObj.keys().count() <= 0){
         return false;
@@ -305,7 +311,7 @@ bool CommonUtils::ParseGoodItemJson(QString goodItemStr){
     }
 }
 
-bool CommonUtils::ParseChangeGoodJson(QString changeStr){
+bool CommonUtils::ParseChangeGoodJson(QString changeStr, JsonClass& ReplayJson){
     QJsonObject changeObj = GetJsonObject(changeStr);
     if(changeObj.keys().count() <= 0){
         return false;
@@ -325,11 +331,12 @@ bool CommonUtils::ParseChangeGoodJson(QString changeStr){
 }
 
 bool CommonUtils::WriteReplayLog(JsonClass replayJson, QString path){
+    QString fullPath = "";
     if(path == ""){
-        QString qexeFullPath = QCoreApplication::applicationDirPath();
-        path =  QDir::toNativeSeparators(qexeFullPath);
+       fullPath = GetExePath(replayJson.loginJson.PhoneNumber);
+    }else{
+        fullPath = path + "/" +replayJson.loginJson.PhoneNumber;
     }
-    QString fullPath = path + "/" +replayJson.loginJson.PhoneNumber;
     fullPath = QDir::toNativeSeparators(fullPath);
     QFile file(fullPath);
     if(!file.open(QIODevice::Text| QIODevice::Append)){
@@ -377,152 +384,6 @@ bool CommonUtils::WriteReplayLog(JsonClass replayJson, QString path){
     writeStr += "message" + replayJson.goodChangedJson.Message + ",\n";
     writeStr += "result" + replayJson.goodChangedJson.Result + ";\n";
 }
-
-ExcelHelper::ExcelHelper(){
-    logListModel = nullptr;
-}
-bool ExcelHelper::InitExcel(bool init){
-    LogHelper::Instance()->SetLogListModel(logListModel);
-
-    if(init){
-        QString qexeFullPath = QCoreApplication::applicationDirPath();
-        DefaultExcelPath = qexeFullPath + "/DefaultExcel.xlsx";
-        DefaultExcelPath =  QDir::toNativeSeparators(DefaultExcelPath);
-    }
-    QAxObject * pWorkBook = NULL;
-    if(!OpenExcel(DefaultExcelPath,InitExcelObj, pWorkBook)){
-        LogHelper::Instance()->AppendLogList("打开Excel表失败");
-    }
-   // QAxObject *pWorkSheets = pWorkBook->querySubObject("Sheets");
-    QAxObject * sheet1 = pWorkBook->querySubObject("WorkSheets(int)",1);//获得sheet1；
-    SetCell(sheet1,1,1,"a");
-    CloseExcel(DefaultExcelPath,InitExcelObj,pWorkBook);
-}
-
-bool ExcelHelper::OpenExcel(QString strPath, QAxObject* pExcel, QAxObject* _pWorkbook){
-
-    pExcel = new(std::nothrow) QAxObject();
-    if(pExcel == nullptr){
-        return false;
-    }
-    try {
-        if(pExcel->setControl("Excel.Application")){
-            LogHelper::Instance()->AppendLogList("加载Excel成功!");
-        }else{
-            if(pExcel->setControl("ket.Application")){
-                LogHelper::Instance()->AppendLogList("加载WPS-Excel成功");
-            }else{
-                LogHelper::Instance()->AppendLogList("加载Excel或WPS-Excel失败");
-                return false;
-            }
-        }
-
-        pExcel->setProperty("Visible",false);
-
-        //打开WorkBooks
-        QAxObject *pWorkBooks = pExcel->querySubObject("WorkBooks");
-
-        if(!CommonUtils::Instance()->IsFilorDirExist(strPath)){
-            pWorkBooks->dynamicCall("Add");
-            //获得活跃的workbook
-            _pWorkbook = pExcel->querySubObject("ActiveWorkBook");
-            QVariant savVar = _pWorkbook->dynamicCall("SaveAs(const QString&)",DefaultExcelPath);
-        }else{
-            pWorkBooks->dynamicCall("Open(const QString&)", DefaultExcelPath);//打开已存在的excel
-        }
-
-        //获得活跃的workbook
-        _pWorkbook = pExcel->querySubObject("ActiveWorkBook");
-
-        //获得workbook中的所有worksheet
-        //pWorkSheets = _pWorkbook->querySubObject("WorkSheets");
-
-    } catch (...) {
-     return false;
-    }
-    return true;
-}
-
-bool ExcelHelper::CloseExcel(QString strPath, QAxObject *pExcel, QAxObject *pWorkBook){
-
-    if(pWorkBook){
-        pWorkBook->dynamicCall("SaveAs(const QString&)",QDir::toNativeSeparators(strPath));
-        pWorkBook->dynamicCall("Close()");
-        delete pWorkBook;
-        pWorkBook = NULL;
-    }
-    if(pExcel){
-        pExcel->dynamicCall("Quit()");
-        delete pExcel;
-        pExcel = NULL;
-    }
-    return true;
-}
-
-
-bool ExcelHelper::SetCell(QAxObject* pSheet, int row, int column, QString value){
-    try {
-        QAxObject* pCell = pSheet->querySubObject("Cells(int,int)",row,column);//获取指定行列的单元格
-        if(pCell != nullptr){
-            pCell->setProperty("Value",value);
-        }else{
-            return false;
-        }
-    } catch (...) {
-        LogHelper::Instance()->AppendLogList("写入单元格失败");
-        return false;
-    }
-    return true;
-}
-
-
-bool ExcelHelper::SetCell(QAxObject* pSheet, QString number, QString value){
-    try{
-        QAxObject* pCell = pSheet->querySubObject("Range(QString)",number);
-        if(pCell != nullptr){
-            pCell->setProperty("Value",value);
-        }else{
-            return false;
-        }
-
-    }catch(...){
-        LogHelper::Instance()->AppendLogList("写入单元格失败");
-        return false;
-    }
-    return true;
-}
-
-
-bool ExcelHelper::GetCell(QAxObject* pSheet, QString number, QString& strCell){
-    try {
-        QAxObject* pCell = pSheet->querySubObject("Range(QString)",number);
-        if(pCell != nullptr){
-            strCell = pCell->property("Value").toString();
-        }else{
-            return false;
-        }
-    } catch (...) {
-        LogHelper::Instance()->AppendLogList("获取单元格数据失败");
-        return false;
-    }
-    return true;
-}
-
-bool ExcelHelper::GetCell(QAxObject* pSheet, int row, int column, QString &strCell){
-    try {
-        QAxObject* pCell = pSheet->querySubObject("Cells(int, int)", row, column);
-        if(pCell != nullptr){
-            strCell = pCell->property("Value").toString();
-        }else{
-            return false;
-        }
-    } catch (...) {
-        LogHelper::Instance()->AppendLogList("获取单元格数据失败");
-        return false;
-    }
-    return true;
-}
-
 
 
 LogHelper::LogHelper(){

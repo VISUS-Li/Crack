@@ -15,6 +15,7 @@
 #include <QJsonObject>
 
 #include "common.h"
+#include "util.h"
 
 class changeThread : public QThread
 {
@@ -26,9 +27,11 @@ public:
 private:
     QTableWidget *table;
     int currentRow;
-    QString userID, memberID, passWord, token, changeList,detail, change;
+    QString userID, memberID, passWord, token, changeList, detail, change, store;
+    QString recordid = "535", goodid = "585", eid = "978", isspike = "0", changeCount = "2";
+    JsonClass jsonReplay;
 
-    bool requestRet = false, changeRet = false;
+    bool requestRet = false, changeRet = false, isExpired = false;//用户信息过期
 
     QJsonDocument logInReturn;
     QJsonDocument homePageReturn;

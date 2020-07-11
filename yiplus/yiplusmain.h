@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 #ifndef YIPLUSMAIN_H
 #define YIPLUSMAIN_H
 
@@ -25,16 +23,18 @@ public:
     ~ YiPlusMain();
 
 private:
+
+    void OnInit();
+
+private:
     Ui::YiPlusMain *ui;
     QFile *File_Account;
     QFile *File_RequestLog;
     QString FileAccoutnPath;
     QStandardItemModel *LogListItem;
+    QList<Account> Accounts;//所有用户
 
-    memberInfo_t *memberInfo;
-
-    bool InitAccounts();
-
+    QList<changeThread*> ThreadPool;//用于同一销毁线程
 signals:
 
 private slots:

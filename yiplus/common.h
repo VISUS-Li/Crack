@@ -14,6 +14,7 @@ typedef struct _memberInfo_t {
     QString memberID;
     QString passWord;
     QString token;
+    QString store;//店铺ID
 
 }memberInfo_t;
 

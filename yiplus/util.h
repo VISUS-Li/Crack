@@ -27,6 +27,10 @@ class JsonClass{
        QString Token;
 
        stu_LoginJson(){
+            Reset();
+       }
+
+       void Reset(){
            ResFlag = "";
            Message = "";
            PhoneNumber = "";
@@ -47,6 +51,9 @@ class JsonClass{
         QString setStatus;
 
         stu_NextRoad(){
+            Reset();
+        }
+        void Reset(){
             Detail = "";
             Status = "";
             ChangeList = "";
@@ -63,9 +70,13 @@ class JsonClass{
         QString Spikeunit;
 
         stu_HomePageJson(){
+            Reset();
+        }
+        void Reset(){
             ResFlag = "";
             IsExpired = "";
             Spikeunit = "";
+            NextRoad_ChangeList.Reset();
         }
     }HomeJson;
 
@@ -87,6 +98,9 @@ class JsonClass{
         NextRoad nextRoad;
 
         stu_GoodsItem(){
+            Reset();
+        }
+        void Reset(){
             ResFlag = "";
             Recoidid = "";
             GoodsName = "";
@@ -100,6 +114,7 @@ class JsonClass{
             Eid = "";
             Isspike = "";
             Effectivepoint = "";
+            nextRoad.Reset();
         }
     }MoutaiGood,GoodsItem;
 
@@ -110,7 +125,12 @@ class JsonClass{
         NextRoad NextRoad;
 
         stu_GoodsListJson(){
+
+        }
+        void Reset(){
             ResFlag = "";
+            MoutaiItem.Reset();
+            NextRoad.Reset();
         }
     } GoodListJson;
 
@@ -119,6 +139,9 @@ class JsonClass{
         QString Message;
         QString Result;
         stu_ChangeGoodsJson(){
+            Reset();
+        }
+        void Reset(){
             flag = "";
             Message = "";
             Result = "";
@@ -131,6 +154,15 @@ public:
     MoutaiGood moutaiJson;
     GoodListJson goodListJson;
     ChangeJson goodChangedJson;//兑换后返回的信息
+
+    void Reset(){
+        loginJson.Reset();
+        nextRoadJson.Reset();
+        homePageJson.Reset();
+        moutaiJson.Reset();
+        goodListJson.Reset();
+        goodChangedJson.Reset();
+    }
 };
 class CommonUtils
 {
@@ -144,18 +176,17 @@ public:
     }
     void Relese();
     bool IsFilorDirExist(QString path);
+    QString GetExePath(QString fileName = "");
     bool ImportAccount(QString filePath, QList<Account> *accountList);
     bool InsertDefAccountDoc(Account account);
     bool WriteReplayLog(JsonClass replayJson, QString path = "");//每个账号单独写一个文件
 
-    bool ParseLoginJson(QString loginStr);//登录返回的json
-    bool ParseHomePageJson(QString homeStr);//获取主页返回的json
-    bool ParseGoodListsJson(QString goodsListStr);//获取商品列表返回的json
-    bool ParseGoodItemJson(QString goodItemStr);//获取商品详情返回的json
-    bool ParseChangeGoodJson(QString changeStr);//兑换商品返回的json
-    inline JsonClass GetReplayJson(){
-        return ReplayJson;
-    }
+    bool ParseLoginJson(QString loginStr, JsonClass& ReplayJson);//登录返回的json
+    bool ParseHomePageJson(QString homeStr, JsonClass& ReplayJson);//获取主页返回的json
+    bool ParseGoodListsJson(QString goodsListStr, JsonClass& ReplayJson);//获取商品列表返回的json
+    bool ParseGoodItemJson(QString goodItemStr, JsonClass& ReplayJson);//获取商品详情返回的json
+    bool ParseChangeGoodJson(QString changeStr, JsonClass& ReplayJson);//兑换商品返回的json
+
     void inline SetDefAccDocPath(QString path){
         defAccDocPath = path;
     }
@@ -167,7 +198,7 @@ private:
     QFile *DefualtFile;
     QString defAccDocPath;//默认的账户文档地址
 
-    JsonClass ReplayJson;
+    //JsonClass ReplayJson;
 };
 
 
