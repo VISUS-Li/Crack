@@ -24,6 +24,27 @@ void CommonUtils::Relese(){
         DefualtFile = NULL;
     }
 }
+
+//外界需要free掉
+char* CommonUtils::QString2Char(QString str){
+    char *chStr = NULL;
+     QByteArray ba = str.toLatin1();
+     chStr = (char *)malloc(ba.length() + 1);
+     memset(chStr, 0, ba.length());
+     memcpy(chStr, ba.data(), ba.length());
+     chStr[ba.length()] = '\0';
+     return chStr;
+}
+int CommonUtils::GetAccEnableCounts(QList<Account> accounts){
+    int ret = 0;
+    for(int i = 0; i < accounts.size(); i++){
+        if(accounts[i].isEnable()){
+            ret++;
+        }
+    }
+    return ret;
+}
+
 bool CommonUtils::IsFilorDirExist(QString path){
     QFile file(path);
     if(file.exists()){
@@ -41,6 +62,14 @@ QString CommonUtils::GetExePath(QString fileName){
     return qexeFullPath;
 }
 
+bool CommonUtils::AccountExist(QList<Account> account,QString userID){
+    for(int i = 0; i < account.count(); i++){
+        if(account[i].GetPoneNumber() == userID){
+            return true;
+        }
+    }
+    return false;
+}
 bool CommonUtils::ImportAccount(QString filePath, QList<Account> *accountList){
     File = new QFile(filePath);
     if(!File->open(QIODevice::ReadOnly | QIODevice::Text)){
@@ -68,19 +97,20 @@ bool CommonUtils::ImportAccount(QString filePath, QList<Account> *accountList){
         QString accountStr = allAccountList[i];
         QStringList splitAccount = accountStr.split(",",QString::SkipEmptyParts);
         Account newAccount(splitAccount[0],splitAccount[1],"001");
-        accountList->push_back(newAccount);
+        if(!AccountExist(*accountList,newAccount.GetPoneNumber())){
+            accountList->push_back(newAccount);
+        }
         InsertDefAccountDoc(newAccount);
         LogHelper::Instance()->AppendLogList(splitAccount[0]+"-"+splitAccount[1]);
     }
-    if(accountList->count() <= 0){
-        File->close();
-        delete File;
-        File = NULL;
-        return false;
-    }
+
     File->close();
     delete File;
     File = NULL;
+
+    if(accountList->count() <= 0){
+        return false;
+    }
     return true;
 }
 
@@ -128,7 +158,12 @@ bool CommonUtils::ParseLoginJson(QString loginStr, JsonClass& ReplayJson){
     }
     if(loginObj.contains("flag")){
         QJsonValue value = loginObj.value("flag");
-        ReplayJson.loginJson.ResFlag = value.toString();
+        bool ret = value.toBool();
+        if(ret){
+            ReplayJson.loginJson.ResFlag = "true";
+        }else{
+            ReplayJson.loginJson.ResFlag = "false";
+        }
     }
     if(loginObj.contains("result")){
         QJsonValue resultValue = loginObj.value("result");
@@ -159,7 +194,12 @@ bool CommonUtils::ParseHomePageJson(QString homeStr,JsonClass& ReplayJson){
 
     if(homeObj.contains("flag")){
         QJsonValue value = homeObj.value("flag");
-        ReplayJson.homePageJson.ResFlag = value.toString();
+        bool ret = value.toBool();
+        if(ret){
+            ReplayJson.homePageJson.ResFlag = "true";
+        }else{
+            ReplayJson.homePageJson.ResFlag = "false";
+        }
     }
     if(homeObj.contains("result")){
         QJsonValue resValue = homeObj.value("result");
@@ -197,7 +237,12 @@ bool CommonUtils::ParseGoodListsJson(QString goodsListStr, JsonClass& ReplayJson
 
     if(GoodsObj.contains("flag")){
         QJsonValue value = GoodsObj.value("flag");
-        ReplayJson.goodListJson.ResFlag = value.toString();
+        bool ret = value.toBool();
+        if(ret){
+            ReplayJson.goodListJson.ResFlag = "true";
+        }else{
+            ReplayJson.goodListJson.ResFlag = "false";
+        }
     }
     if(GoodsObj.contains("result")){
         QJsonValue resValue = GoodsObj.value("result");
@@ -283,7 +328,12 @@ bool CommonUtils::ParseGoodItemJson(QString goodItemStr, JsonClass& ReplayJson){
     }
     if(itemObj.contains("flag")){
         QJsonValue value = itemObj.value("flag");
-        ReplayJson.moutaiJson.ResFlag = value.toString();
+        bool ret = value.toBool();
+        if(ret){
+            ReplayJson.moutaiJson.ResFlag = "true";
+        }else{
+            ReplayJson.moutaiJson.ResFlag = "false";
+        }
     }
     if(itemObj.contains("result")){
         QJsonValue value = itemObj.value("result");
@@ -318,7 +368,12 @@ bool CommonUtils::ParseChangeGoodJson(QString changeStr, JsonClass& ReplayJson){
     }
     if(changeObj.contains("flag")){
         QJsonValue value = changeObj.value("flag");
-        ReplayJson.goodChangedJson.flag = value.toString();
+        bool ret = value.toBool();
+        if(ret){
+            ReplayJson.goodChangedJson.flag = "true";
+        }else{
+            ReplayJson.goodChangedJson.flag = "false";
+        }
     }
     if(changeObj.contains("message")){
         QJsonValue value = changeObj.value("message");
@@ -333,9 +388,9 @@ bool CommonUtils::ParseChangeGoodJson(QString changeStr, JsonClass& ReplayJson){
 bool CommonUtils::WriteReplayLog(JsonClass replayJson, QString path){
     QString fullPath = "";
     if(path == ""){
-       fullPath = GetExePath(replayJson.loginJson.PhoneNumber);
+       fullPath = GetExePath(replayJson.loginJson.PhoneNumber+".txt");
     }else{
-        fullPath = path + "/" +replayJson.loginJson.PhoneNumber;
+        fullPath = GetExePath() + "/" +path;
     }
     fullPath = QDir::toNativeSeparators(fullPath);
     QFile file(fullPath);
@@ -346,43 +401,47 @@ bool CommonUtils::WriteReplayLog(JsonClass replayJson, QString path){
     QDateTime nowTime = QDateTime::currentDateTime();
     QString nowTimeStr = nowTime.toString("yyyy-MM-dd hh:mm::ss.zzz");
     writeStr += "\n\n\n\n\n";
+    writeStr += "==========================================\n";
     writeStr += nowTimeStr+"\n";
+    writeStr += "==========================================\n";
 
     //基本信息
     writeStr += "获取登录信息\n";
     writeStr += "phoneNumber:"+replayJson.loginJson.PhoneNumber+ ",\n";
-    writeStr += "memberid" + replayJson.loginJson.MemberId + ",\n";
-    writeStr += "token" + replayJson.loginJson.Token + ",\n";
-    writeStr += "flag" + replayJson.loginJson.ResFlag + ",\n";
-    writeStr += "message" + replayJson.loginJson.Message + ";\n\n";
+    writeStr += "memberid:" + replayJson.loginJson.MemberId + ",\n";
+    writeStr += "token:" + replayJson.loginJson.Token + ",\n";
+    writeStr += "flag:" + replayJson.loginJson.ResFlag + ",\n";
+    writeStr += "message:" + replayJson.loginJson.Message + ";\n\n";
 
     //获取首页信息
     writeStr += "获取首页信息\n";
-    writeStr += "flag" + replayJson.homePageJson.ResFlag + ",\n";
-    writeStr += "isExpired" + replayJson.homePageJson.IsExpired + ",\n";
-    writeStr += "changeList" + replayJson.homePageJson.NextRoad_ChangeList.ChangeList + ";\n\n";
+    writeStr += "flag:" + replayJson.homePageJson.ResFlag + ",\n";
+    writeStr += "isExpired:" + replayJson.homePageJson.IsExpired + ",\n";
+    writeStr += "changeList:" + replayJson.homePageJson.NextRoad_ChangeList.ChangeList + ";\n\n";
 
     //获取商品列表
     writeStr += "获取商品列表\n";
-    writeStr += "flag" + replayJson.goodListJson.ResFlag + ",\n";
-    writeStr += "detail" + replayJson.goodListJson.NextRoad.Detail + ";\n\n";
+    writeStr += "flag:" + replayJson.goodListJson.ResFlag + ",\n";
+    writeStr += "detail:" + replayJson.goodListJson.NextRoad.Detail + ";\n\n";
 
     //获取茅台信息
     writeStr += "获取茅台信息\n";
-    writeStr += "flag" + replayJson.moutaiJson.ResFlag + ",\n";
-    writeStr += "check" + replayJson.moutaiJson.nextRoad.Check +",\n";
-    writeStr += "change" + replayJson.moutaiJson.nextRoad.Change + ",\n";
-    writeStr += "recordid" + replayJson.moutaiJson.Recoidid + ",\n";
-    writeStr += "goodsName" + replayJson.moutaiJson.GoodsName + ",\n";
-    writeStr += "goodsCount" + replayJson.moutaiJson.GoodsCount + ",\n";
-    writeStr += "changeCount" + replayJson.moutaiJson.ChangeCount + ",\n";
-    writeStr += "changeLimit" + replayJson.moutaiJson.changeLimit + ";\n\n";
+    writeStr += "flag:" + replayJson.moutaiJson.ResFlag + ",\n";
+    writeStr += "check:" + replayJson.moutaiJson.nextRoad.Check +",\n";
+    writeStr += "change:" + replayJson.moutaiJson.nextRoad.Change + ",\n";
+    writeStr += "recordid:" + replayJson.moutaiJson.Recoidid + ",\n";
+    writeStr += "goodsName:" + replayJson.moutaiJson.GoodsName + ",\n";
+    writeStr += "goodsCount:" + replayJson.moutaiJson.GoodsCount + ",\n";
+    writeStr += "changeCount:" + replayJson.moutaiJson.ChangeCount + ",\n";
+    writeStr += "changeLimit:" + replayJson.moutaiJson.changeLimit + ";\n\n";
 
     //兑换信息
     writeStr += "兑换信息\n";
-    writeStr += "flag" + replayJson.goodChangedJson.flag + ",\n";
-    writeStr += "message" + replayJson.goodChangedJson.Message + ",\n";
-    writeStr += "result" + replayJson.goodChangedJson.Result + ";\n";
+    writeStr += "flag:" + replayJson.goodChangedJson.flag + ",\n";
+    writeStr += "message:" + replayJson.goodChangedJson.Message + ",\n";
+    writeStr += "result:" + replayJson.goodChangedJson.Result + ";\n";
+    file.write(writeStr.toUtf8());
+    file.close();
 }
 
 

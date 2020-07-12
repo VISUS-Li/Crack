@@ -8,7 +8,6 @@ class Account
 public:
     Account(QString phone, QString pwd, QString store);
 
-    QString AesEncrypt();
     inline QString GetPoneNumber(){
         return m_QStrPhoneNumber;
     }
@@ -26,16 +25,6 @@ public:
     }
     inline void SetStore(QString store){
         m_QStrStore = store;
-    }
-    //外界需要free掉
-    inline char* QString2Char(QString str){
-        char *chStr = NULL;
-         QByteArray ba = str.toLatin1();
-         chStr = (char *)malloc(ba.length() + 1);
-         memset(chStr, 0, ba.length());
-         memcpy(chStr, ba.data(), ba.length());
-         chStr[ba.length()] = '\0';
-         return chStr;
     }
 
     inline void setEnable(bool flag){

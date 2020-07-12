@@ -175,6 +175,9 @@ public:
         return m_Comm;
     }
     void Relese();
+    char* QString2Char(QString str);
+    int GetAccEnableCounts(QList<Account> account);//获得可用的账户数
+    bool AccountExist(QList<Account> account,QString userID);
     bool IsFilorDirExist(QString path);
     QString GetExePath(QString fileName = "");
     bool ImportAccount(QString filePath, QList<Account> *accountList);

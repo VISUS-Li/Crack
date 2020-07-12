@@ -2,6 +2,7 @@
 
 Account::Account(QString phone, QString pwd, QString store)
 {
+    Enable = true;
     m_QStrPhoneNumber = phone;
     m_QStrPassWord = pwd;
     m_QStrStore = store;
@@ -10,5 +11,3 @@ Account::Account(QString phone, QString pwd, QString store)
     }
 }
 
-QString Account::AesEncrypt(){
-}

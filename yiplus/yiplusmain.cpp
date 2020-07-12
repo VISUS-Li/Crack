@@ -65,16 +65,27 @@ void YiPlusMain::on_Btn_AddAccount_clicked()
 
 void YiPlusMain::on_Btn_StartRob_clicked()
 {
-    for(int i = 0; i < Accounts.size(); i++){
-        memberInfo_t *memberInfo = new memberInfo_t;
-        memberInfo->userID = Accounts[i].GetPoneNumber();
-        memberInfo->passWord = Accounts[i].GetPassWord();
-        memberInfo->store = Accounts[i].GetStore();
-        changeThread *myThread = new changeThread(memberInfo);
-        ThreadPool.push_back(myThread);
-
-        myThread->start();
+    QString accPath = CommonUtils::Instance()->GetExePath("account.txt");
+    CommonUtils::Instance()->ImportAccount(accPath,&Accounts);
+    if(Accounts.size() <= 0 || CommonUtils::Instance()->GetAccEnableCounts(Accounts) <= 0){
+        LogHelper::Instance()->AppendLogList("可用账户为空");
     }
+    if(ThreadPool.size() <= 0 ){
+        for(int i = 0; i < Accounts.size(); i++){
+            if(Accounts[i].GetPoneNumber() == ""){
+                LogHelper::Instance()->AppendLogList("账户电话号码为空");
+            }else if(Accounts[i].GetPassWord() == ""){
+                LogHelper::Instance()->AppendLogList("账户密码为空");
+            }else{
+                memberInfo_t *memberInfo = new memberInfo_t;
+                memberInfo->userID = Accounts[i].GetPoneNumber();
+                memberInfo->passWord = Accounts[i].GetPassWord();
+                memberInfo->store = Accounts[i].GetStore();
+                changeThread *myThread = new changeThread(memberInfo);
+                ThreadPool.push_back(myThread);
 
-
+                myThread->start();
+            }
+        }
+    }
 }

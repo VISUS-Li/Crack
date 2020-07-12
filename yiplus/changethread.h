@@ -31,13 +31,10 @@ private:
     QString recordid = "535", goodid = "585", eid = "978", isspike = "0", changeCount = "2";
     JsonClass jsonReplay;
 
-    bool requestRet = false, changeRet = false, isExpired = false;//用户信息过期
+    bool loginRet = false/*登录状态*/, requestRet = false/*各个请求的统一状态*/, changeRet = false, isExpired = false;//用户信息过期
 
-    QJsonDocument logInReturn;
-    QJsonDocument homePageReturn;
-    QJsonDocument goodsListReturn;
-    QJsonDocument goodInfoReturn;
-    QJsonDocument exchangeGoodReturn;
+    QByteArray Post(QString uri, QString header);
+    QByteArray Get(QString uri);
 
     void signIN();
     void getHomePage();
@@ -46,12 +43,11 @@ private:
     void changeGoods();
 
 private slots:
-    void replyFinished(QNetworkReply*);
-    void replyHomePage(QNetworkReply*);
-    void replyGoodsList(QNetworkReply *);
-    void replyGoodInfo(QNetworkReply *);
-    void replyGoodChange(QNetworkReply *reply);
-    void on_readyRead();
+    void replyFinished(QByteArray arry);
+    void replyHomePage(QByteArray arry);
+    void replyGoodsList(QByteArray arry);
+    void replyGoodInfo(QByteArray arry);
+    void replyGoodChange(QByteArray arrys);
 
 
 protected:
