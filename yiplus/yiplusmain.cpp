@@ -89,3 +89,32 @@ void YiPlusMain::on_Btn_StartRob_clicked()
         }
     }
 }
+
+void YiPlusMain::on_Btn_LoginTest_clicked()
+{
+    QString userName = ui->Edit_UserName->text();
+    QString passWord = ui->Edit_Password->text();
+    Account newAccount(userName,passWord,"001");
+    memberInfo_t *memberInfo = new memberInfo_t;
+    memberInfo->userID = userName;
+    memberInfo->passWord = passWord;
+    memberInfo->store = "001";
+    changeThread *myThread = new changeThread(memberInfo);
+    ThreadPool.push_back(myThread);
+    myThread->start();
+}
+
+void YiPlusMain::on_Btn_StopAll_clicked()
+{
+    if(ThreadPool.size() > 0){
+        for(int i = 0; i < ThreadPool.size(); i++){
+            changeThread *myThread = ThreadPool.front();
+            if(!myThread->isStop){
+                myThread->isStop = true;
+            }
+            myThread->exit();
+            myThread->wait();
+            ThreadPool.pop_front();
+        }
+    }
+}

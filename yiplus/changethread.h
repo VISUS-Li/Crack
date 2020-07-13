@@ -13,6 +13,7 @@
 #include <QNetworkReply>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QMutex>
 
 #include "common.h"
 #include "util.h"
@@ -23,12 +24,17 @@ class changeThread : public QThread
 public:
     changeThread(memberInfo_t *memInfo);
     bool returnURLCheck(QJsonDocument );
+    bool isStop = false;
+    bool isLogInTest = false;
 
 private:
     QTableWidget *table;
     int currentRow;
     QString userID, memberID, passWord, token, changeList, detail, change, store;
     QString recordid = "535", goodid = "585", eid = "978", isspike = "0", changeCount = "2";
+
+    QMutex mutex;
+
     JsonClass jsonReplay;
 
     bool loginRet = false/*登录状态*/, requestRet = false/*各个请求的统一状态*/, changeRet = false, isExpired = false;//用户信息过期

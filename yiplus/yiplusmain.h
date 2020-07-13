@@ -40,6 +40,8 @@ signals:
 private slots:
     void on_Btn_AddAccount_clicked();
     void on_Btn_StartRob_clicked();
+    void on_Btn_LoginTest_clicked();
+    void on_Btn_StopAll_clicked();
 };
 
 

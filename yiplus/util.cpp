@@ -99,9 +99,9 @@ bool CommonUtils::ImportAccount(QString filePath, QList<Account> *accountList){
         Account newAccount(splitAccount[0],splitAccount[1],"001");
         if(!AccountExist(*accountList,newAccount.GetPoneNumber())){
             accountList->push_back(newAccount);
+            InsertDefAccountDoc(newAccount);
+            LogHelper::Instance()->AppendLogList(splitAccount[0]+"-"+splitAccount[1]);
         }
-        InsertDefAccountDoc(newAccount);
-        LogHelper::Instance()->AppendLogList(splitAccount[0]+"-"+splitAccount[1]);
     }
 
     File->close();

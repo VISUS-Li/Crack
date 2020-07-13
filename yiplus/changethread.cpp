@@ -20,7 +20,26 @@ void  changeThread::run()
 {
     jsonReplay.Reset();
     int cnt=0;
-    signIN();
+    if(isLogInTest){
+        int loginTestCount = 0;
+        while (1) {
+            signIN();
+            if(isStop){
+                break;
+            }
+            CommonUtils::Instance()->WriteReplayLog(jsonReplay,userID+".txt");
+            if(jsonReplay.loginJson.ResFlag == "true"){
+                LogHelper::Instance()->AppendLogList("账号:"+userID+",密码:"+passWord+",登录测试成功!");
+                break;
+            }
+            if(++loginTestCount >= 10){
+                LogHelper::Instance()->AppendLogList("账号:"+userID+",密码:"+passWord+",登录测试失败!");
+                break;
+            }
+            usleep(100000);
+        }
+    }
+
     while (1) {
         if( requestRet && loginRet) {
             if( !changeRet) {
@@ -30,10 +49,16 @@ void  changeThread::run()
                 qDebug() << "请求结果:" << changeRet <<"请求兑换次数: " << cnt;
             }
         }
+        mutex.lock();
+        if(isStop){
+            break;
+        }
+        mutex.unlock();
+
         if(!requestRet || !loginRet){
             signIN();
         }
-         CommonUtils::Instance()->WriteReplayLog(jsonReplay,userID+".txt");
+
     }
 
 }
