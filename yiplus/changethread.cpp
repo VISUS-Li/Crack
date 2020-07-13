@@ -18,27 +18,34 @@ changeThread::changeThread(memberInfo_t *memInfo)
 
 void  changeThread::run()
 {
+//    {
+//        signIN();
+//        getHomePage();
+//        return;
+//    }
+
+
     jsonReplay.Reset();
     int cnt=0;
-    if(isLogInTest){
-        int loginTestCount = 0;
-        while (1) {
-            signIN();
-            if(isStop){
-                break;
-            }
-            CommonUtils::Instance()->WriteReplayLog(jsonReplay,userID+".txt");
-            if(jsonReplay.loginJson.ResFlag == "true"){
-                LogHelper::Instance()->AppendLogList("账号:"+userID+",密码:"+passWord+",登录测试成功!");
-                break;
-            }
-            if(++loginTestCount >= 10){
-                LogHelper::Instance()->AppendLogList("账号:"+userID+",密码:"+passWord+",登录测试失败!");
-                break;
-            }
-            usleep(100000);
-        }
-    }
+//    if(isLogInTest){
+//        int loginTestCount = 0;
+//        while (1) {
+//            signIN();
+//            if(isStop){
+//                break;
+//            }
+//            CommonUtils::Instance()->WriteReplayLog(jsonReplay,userID+".txt");
+//            if(jsonReplay.loginJson.ResFlag == "true"){
+//                LogHelper::Instance()->AppendLogList("账号:"+userID+",密码:"+passWord+",登录测试成功!");
+//                break;
+//            }
+//            if(++loginTestCount >= 10){
+//                LogHelper::Instance()->AppendLogList("账号:"+userID+",密码:"+passWord+",登录测试失败!");
+//                break;
+//            }
+//            usleep(100000);
+//        }
+//    }
 
     while (1) {
         if( requestRet && loginRet) {
@@ -146,10 +153,11 @@ void changeThread::replyFinished(QByteArray arry)
 void changeThread::getHomePage()
 {
     qDebug() << "开始请求主页";
-       QString paramUrl = "start=0&length=15&store="+store+"&memberid="+memberID+"&memberId="+memberID+"&mobile="+userID+"&token="+token+"&language=zh";
-       homePageURL = homePageURL + paramUrl;
-       QByteArray arry = Get(homePageURL);
-       replyHomePage(arry);
+    QString paramUrl = "start=0&length=15&store="+store+"&memberid="+memberID+"&memberId="+memberID+"&mobile="+userID+"&token="+token+"&language=zh";
+    QString targetUrl = homePageURL + paramUrl;
+    qDebug()<<"请求主页:"<<targetUrl;
+    QByteArray arry = Get(targetUrl);
+    replyHomePage(arry);
 }
 
 
@@ -181,6 +189,7 @@ void changeThread::getGoodsList()
         QString homeCtrlURL = CtrlURL;
         homeCtrlURL = homeCtrlURL + changeList + "?";
         homeCtrlURL = homeCtrlURL + paramUrl;
+        qDebug()<<"请求商品列表:"<<homeCtrlURL;
         QByteArray arry = Get(homeCtrlURL);
         replyGoodsList(arry);
 }
@@ -213,6 +222,7 @@ void changeThread::getGoodsInfo()
         QString homeCtrlURL = CtrlURL;
         homeCtrlURL = homeCtrlURL + detail + "?";
         homeCtrlURL = homeCtrlURL + paramUrl;
+        qDebug()<<"请求商品信息:"<<homeCtrlURL;
         QByteArray arry = Post(homeCtrlURL,paramUrl);
         replyGoodInfo(arry);
 }
@@ -241,13 +251,14 @@ void changeThread::replyGoodChange(QByteArray arry)
 {
     QString replyStr(arry);
     CommonUtils::Instance()->ParseChangeGoodJson(replyStr,jsonReplay);
-    if(jsonReplay.goodChangedJson.flag == "true"){
+    if(jsonReplay.goodChangedJson.flag == "true" && jsonReplay.goodChangedJson.Message == "兑换成功"){
         requestRet = true;
         changeRet = true;
     }else{
         changeRet = false;
+        getGoodsInfo();
     }
-    if(jsonReplay.goodChangedJson.Message == "用户信息过期" || jsonReplay.goodChangedJson.Message == "002"){
+    if(jsonReplay.goodChangedJson.Message == "用户信息过期" || jsonReplay.goodChangedJson.Message == "02"){
         isExpired = true;
     }
 }

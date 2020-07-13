@@ -22,6 +22,9 @@
      <height>20</height>
     </rect>
    </property>
+   <property name="text">
+    <string>GCN0kn9VEM5pc7zPakk2YA==</string>
+   </property>
   </widget>
   <widget class="QTimeEdit" name="Time_EndRob">
    <property name="geometry">
@@ -145,6 +148,9 @@
      <width>113</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="text">
+    <string>15002326234</string>
    </property>
   </widget>
   <widget class="QPushButton" name="Btn_StartRob">

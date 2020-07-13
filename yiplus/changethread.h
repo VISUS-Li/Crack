@@ -31,7 +31,7 @@ private:
     QTableWidget *table;
     int currentRow;
     QString userID, memberID, passWord, token, changeList, detail, change, store;
-    QString recordid = "535", goodid = "585", eid = "978", isspike = "0", changeCount = "2";
+    QString recordid = "544", goodid = "617", eid = "999", isspike = "0", changeCount = "1";
 
     QMutex mutex;
 
