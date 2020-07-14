@@ -27,25 +27,15 @@ void  changeThread::run()
 
     jsonReplay.Reset();
     int cnt=0;
-//    if(isLogInTest){
-//        int loginTestCount = 0;
-//        while (1) {
-//            signIN();
-//            if(isStop){
-//                break;
-//            }
-//            CommonUtils::Instance()->WriteReplayLog(jsonReplay,userID+".txt");
-//            if(jsonReplay.loginJson.ResFlag == "true"){
-//                LogHelper::Instance()->AppendLogList("账号:"+userID+",密码:"+passWord+",登录测试成功!");
-//                break;
-//            }
-//            if(++loginTestCount >= 10){
-//                LogHelper::Instance()->AppendLogList("账号:"+userID+",密码:"+passWord+",登录测试失败!");
-//                break;
-//            }
-//            usleep(100000);
-//        }
-//    }
+    if(isLogInTest){
+            signIN();
+            CommonUtils::Instance()->WriteReplayLog(jsonReplay,userID+".txt");
+            if(jsonReplay.loginJson.ResFlag == "true"){
+                LogHelper::Instance()->AppendLogList("账号:"+userID+",密码:"+passWord+",登录测试成功!,token:"+jsonReplay.loginJson.Token);
+            }
+            getHomePage();
+            return;
+    }
 
     while (1) {
         if( requestRet && loginRet) {
@@ -76,6 +66,8 @@ QByteArray changeThread::Post(QString uri, QString header)
     QNetworkAccessManager manager;
     QUrl url(uri);
     QNetworkRequest request(url);
+    //request.setRawHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 13_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Html5Plus/1.0 (Immersed/44)");
+    //request.setRawHeader("Accept","application/json,text/javascript,*/*;q=0.01");
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     QObject::connect(&manager, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
     QNetworkReply *reply = manager.post(request, header.toUtf8());
@@ -84,6 +76,24 @@ QByteArray changeThread::Post(QString uri, QString header)
     //LogHelper::Instance()->AppendLogList(arry);
     return arry;
 }
+
+QByteArray changeThread::Post_FormData(QString uri, QString form){
+    QEventLoop eventLoop;
+    QNetworkAccessManager manager;
+    QUrl url(uri);
+    QNetworkRequest request(url);
+    request.setRawHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 13_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Html5Plus/1.0 (Immersed/44)");
+    //request.setRawHeader("Accept","application/json,text/javascript,*/*;q=0.01");
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/form-data");
+    QObject::connect(&manager, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
+    QNetworkReply *reply = manager.post(request, form.toUtf8());
+    eventLoop.exec();
+    QByteArray arry = reply->readAll();
+    //LogHelper::Instance()->AppendLogList(arry);
+    return arry;
+}
+
+
 
 QByteArray changeThread::Get(QString uri)
 {
@@ -107,7 +117,7 @@ void changeThread::changeGoods()
         changeURL = changeURL + paramUrl;
         qDebug() << "changeURL:"+changeURL;
 
-        QByteArray arry = Post(changeURL,paramUrl);
+        QByteArray arry = Post_FormData(changeURL,paramUrl);
         replyGoodChange(arry);
 
 }
@@ -223,7 +233,7 @@ void changeThread::getGoodsInfo()
         homeCtrlURL = homeCtrlURL + detail + "?";
         homeCtrlURL = homeCtrlURL + paramUrl;
         qDebug()<<"请求商品信息:"<<homeCtrlURL;
-        QByteArray arry = Post(homeCtrlURL,paramUrl);
+        QByteArray arry = Post_FormData(homeCtrlURL,paramUrl);
         replyGoodInfo(arry);
 }
 

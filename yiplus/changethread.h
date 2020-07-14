@@ -40,6 +40,7 @@ private:
     bool loginRet = false/*登录状态*/, requestRet = false/*各个请求的统一状态*/, changeRet = false, isExpired = false;//用户信息过期
 
     QByteArray Post(QString uri, QString header);
+    QByteArray Post_FormData(QString uri, QString form);
     QByteArray Get(QString uri);
 
     void signIN();
