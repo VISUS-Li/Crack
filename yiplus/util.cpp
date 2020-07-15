@@ -201,6 +201,11 @@ bool CommonUtils::ParseHomePageJson(QString homeStr,JsonClass& ReplayJson){
             ReplayJson.homePageJson.ResFlag = "false";
         }
     }
+    if(homeObj.contains("message")){
+        QJsonValue value = homeObj.value("message");
+        QString str = value.toString();
+        ReplayJson.homePageJson.Message = str;
+    }
     if(homeObj.contains("result")){
         QJsonValue resValue = homeObj.value("result");
         if(resValue.isObject()){
@@ -244,10 +249,23 @@ bool CommonUtils::ParseGoodListsJson(QString goodsListStr, JsonClass& ReplayJson
             ReplayJson.goodListJson.ResFlag = "false";
         }
     }
+
+    if(GoodsObj.contains("message")){
+        QJsonValue value = GoodsObj.value("message");
+        QString str = value.toString();
+        ReplayJson.goodListJson.Message = str;
+    }
+
     if(GoodsObj.contains("result")){
         QJsonValue resValue = GoodsObj.value("result");
         if(resValue.isObject()){
             QJsonObject resultObj = resValue.toObject();
+            if(resultObj.contains("isExpired")){
+                QJsonValue value = resultObj.value("isExpired");
+                if(value.isString()){
+                    ReplayJson.goodListJson.IsExpired = value.toString();
+                }
+            }
             if(resultObj.contains("exchangeList")){
                 QJsonValue value = resultObj.value("exchangeList");
                 if(value.isObject()){
@@ -335,10 +353,23 @@ bool CommonUtils::ParseGoodItemJson(QString goodItemStr, JsonClass& ReplayJson){
             ReplayJson.moutaiJson.ResFlag = "false";
         }
     }
+
+    if(itemObj.contains("message")){
+        QJsonValue value = itemObj.value("message");
+        QString str = value.toString();
+        ReplayJson.moutaiJson.Message = str;
+    }
+
     if(itemObj.contains("result")){
         QJsonValue value = itemObj.value("result");
         if(value.isObject()){
             QJsonObject obj = value.toObject();
+            if(obj.contains("isExpired")){
+                QJsonValue value = obj.value("isExpired");
+                if(value.isString()){
+                    ReplayJson.moutaiJson.IsExpired = value.toString();
+                }
+            }
             if(obj.contains("nextRoad")){
                 QJsonValue value = obj.value("nextRoad");
                 if(value.isObject()){
@@ -381,7 +412,17 @@ bool CommonUtils::ParseChangeGoodJson(QString changeStr, JsonClass& ReplayJson){
     }
     if(changeObj.contains("result")){
         QJsonValue value = changeObj.value("result");
-        ReplayJson.goodChangedJson.Result = value.toString();
+        if(value.isString()){
+            ReplayJson.goodChangedJson.Result = value.toString();
+        }else if(value.isObject()){
+            QJsonObject obj = value.toObject();
+            if(obj.contains("isExpired")){
+                QJsonValue val = obj.value("isExpired");
+                if(val.isString()){
+                    ReplayJson.goodChangedJson.IsExpired = val.toString();
+                }
+            }
+        }
     }
 }
 
@@ -417,12 +458,14 @@ bool CommonUtils::WriteReplayLog(JsonClass replayJson, QString path){
     writeStr += "获取首页信息\n";
     writeStr += "flag:" + replayJson.homePageJson.ResFlag + ",\n";
     writeStr += "isExpired:" + replayJson.homePageJson.IsExpired + ",\n";
-    writeStr += "changeList:" + replayJson.homePageJson.NextRoad_ChangeList.ChangeList + ";\n\n";
+    writeStr += "changeList:" + replayJson.homePageJson.NextRoad_ChangeList.ChangeList + ",\n";
+    writeStr += "message:" + replayJson.homePageJson.Message + ";\n\n";
 
     //获取商品列表
     writeStr += "获取商品列表\n";
     writeStr += "flag:" + replayJson.goodListJson.ResFlag + ",\n";
-    writeStr += "detail:" + replayJson.goodListJson.NextRoad.Detail + ";\n\n";
+    writeStr += "detail:" + replayJson.goodListJson.NextRoad.Detail + ",\n";
+    writeStr += "message:" + replayJson.goodListJson.Message + ";\n\n";
 
     //获取茅台信息
     writeStr += "获取茅台信息\n";
@@ -433,7 +476,8 @@ bool CommonUtils::WriteReplayLog(JsonClass replayJson, QString path){
     writeStr += "goodsName:" + replayJson.moutaiJson.GoodsName + ",\n";
     writeStr += "goodsCount:" + replayJson.moutaiJson.GoodsCount + ",\n";
     writeStr += "changeCount:" + replayJson.moutaiJson.ChangeCount + ",\n";
-    writeStr += "changeLimit:" + replayJson.moutaiJson.changeLimit + ";\n\n";
+    writeStr += "changeLimit:" + replayJson.moutaiJson.changeLimit + ",\n";
+    writeStr += "message:" + replayJson.moutaiJson.Message + ";\n\n";
 
     //兑换信息
     writeStr += "兑换信息\n";
@@ -447,13 +491,17 @@ bool CommonUtils::WriteReplayLog(JsonClass replayJson, QString path){
 
 LogHelper::LogHelper(){
     logListModel = nullptr;
+    isPrintLog = false;
 }
-bool LogHelper::AppendLogList(QString item){
+bool LogHelper::AppendLogList(QString item,QString userID){
+    if(!isPrintLog){
+        return true;
+    }
     if(logListModel == nullptr){
         return false;
     }
     QString time = QDateTime::currentDateTime().toString("yyyy-MM-dd-hh:mm:ss");
-    item = time + " " + item;
+    item = time + " " + userID + " " + item;
     QStandardItem *stItem = new QStandardItem(item);
     logListModel->appendRow(stItem);
     return true;

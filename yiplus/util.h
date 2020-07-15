@@ -68,6 +68,7 @@ class JsonClass{
         QString IsExpired;
         NextRoad NextRoad_ChangeList;
         QString Spikeunit;
+        QString Message;
 
         stu_HomePageJson(){
             Reset();
@@ -76,6 +77,7 @@ class JsonClass{
             ResFlag = "";
             IsExpired = "";
             Spikeunit = "";
+            Message = "";
             NextRoad_ChangeList.Reset();
         }
     }HomeJson;
@@ -96,11 +98,14 @@ class JsonClass{
         QString Isspike;
         QString Effectivepoint;
         NextRoad nextRoad;
+        QString Message;
+        QString IsExpired;
 
         stu_GoodsItem(){
             Reset();
         }
         void Reset(){
+            Message = "";
             ResFlag = "";
             Recoidid = "";
             GoodsName = "";
@@ -115,6 +120,7 @@ class JsonClass{
             Isspike = "";
             Effectivepoint = "";
             nextRoad.Reset();
+            IsExpired = "";
         }
     }MoutaiGood,GoodsItem;
 
@@ -123,14 +129,18 @@ class JsonClass{
         QString ResFlag;
         MoutaiGood MoutaiItem;
         NextRoad NextRoad;
+        QString Message;
+        QString IsExpired;
 
         stu_GoodsListJson(){
-
+            Reset();
         }
         void Reset(){
             ResFlag = "";
+            Message = "";
             MoutaiItem.Reset();
             NextRoad.Reset();
+            IsExpired = "";
         }
     } GoodListJson;
 
@@ -138,6 +148,7 @@ class JsonClass{
         QString flag;
         QString Message;
         QString Result;
+        QString IsExpired;
         stu_ChangeGoodsJson(){
             Reset();
         }
@@ -145,6 +156,7 @@ class JsonClass{
             flag = "";
             Message = "";
             Result = "";
+            IsExpired = "";
         }
     }ChangeJson;
 public:
@@ -175,6 +187,7 @@ public:
         return m_Comm;
     }
     void Relese();
+
     char* QString2Char(QString str);
     int GetAccEnableCounts(QList<Account> account);//获得可用的账户数
     bool AccountExist(QList<Account> account,QString userID);
@@ -251,10 +264,14 @@ public:
     inline void SetLogListModel(QStandardItemModel* model){
         logListModel = model;
     }
-    bool AppendLogList(QString item);
+    inline void SetIsPrintLog(bool flag){
+        isPrintLog = flag;
+    }
+    bool AppendLogList(QString item, QString userID = "");
 private:
     static LogHelper* m_log;
     QStandardItemModel *logListModel;
+    bool isPrintLog;
 
 
 };

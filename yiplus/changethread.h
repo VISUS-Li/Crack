@@ -14,7 +14,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QMutex>
-
+#include <QNetworkProxy>
 #include "common.h"
 #include "util.h"
 
@@ -24,15 +24,26 @@ class changeThread : public QThread
 public:
     changeThread(memberInfo_t *memInfo);
     bool returnURLCheck(QJsonDocument );
-    bool isStop = false;
     bool isLogInTest = false;
+    void setStopValue(bool value);
+    inline bool getStopStatus(){
+        return isStop;
+    }
+    inline void setUseProxy(bool flag){
+        mutex.lock();
+        useProxy = flag;
+        mutex.unlock();
+    }
 
 private:
+    bool isStop = false;
     QTableWidget *table;
     int currentRow;
     QString userID, memberID, passWord, token, changeList, detail, change, store;
     QString recordid = "544", goodid = "617", eid = "999", isspike = "0", changeCount = "1";
-
+    QString proxyIp = "";
+    int proxyPort = 766;
+    bool useProxy = false;
     QMutex mutex;
 
     JsonClass jsonReplay;
@@ -43,22 +54,24 @@ private:
     QByteArray Post_FormData(QString uri, QString form);
     QByteArray Get(QString uri);
 
-    void signIN();
-    void getHomePage();
-    void getGoodsList();
-    void getGoodsInfo();
-    void changeGoods();
+    bool signIN();
+    bool getHomePage();
+    bool getGoodsList();
+    bool getGoodsInfo();
+    bool changeGoods();
 
 private slots:
-    void replyFinished(QByteArray arry);
-    void replyHomePage(QByteArray arry);
-    void replyGoodsList(QByteArray arry);
-    void replyGoodInfo(QByteArray arry);
-    void replyGoodChange(QByteArray arrys);
-
+    bool replyFinished(QByteArray arry);
+    bool replyHomePage(QByteArray arry);
+    bool replyGoodsList(QByteArray arry);
+    bool replyGoodInfo(QByteArray arry);
+    bool replyGoodChange(QByteArray arrys);
 
 protected:
     void run();
+
+signals:
+    void UserStop();//用户停止的信号
 };
 
 #endif // CHANGETHREAD_H

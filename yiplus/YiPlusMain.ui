@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>749</width>
-    <height>470</height>
+    <width>742</width>
+    <height>517</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,7 @@
   <widget class="QLineEdit" name="Edit_Password">
    <property name="geometry">
     <rect>
-     <x>370</x>
+     <x>310</x>
      <y>20</y>
      <width>113</width>
      <height>20</height>
@@ -29,7 +29,7 @@
   <widget class="QTimeEdit" name="Time_EndRob">
    <property name="geometry">
     <rect>
-     <x>400</x>
+     <x>310</x>
      <y>60</y>
      <width>81</width>
      <height>22</height>
@@ -39,7 +39,7 @@
   <widget class="QPushButton" name="Btn_LoginTest">
    <property name="geometry">
     <rect>
-     <x>610</x>
+     <x>570</x>
      <y>20</y>
      <width>75</width>
      <height>23</height>
@@ -49,24 +49,24 @@
     <string>登录测试</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="Btn_ImportExcel">
+  <widget class="QPushButton" name="Btn_ImportAccount">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>20</y>
-     <width>101</width>
+     <width>61</width>
      <height>23</height>
     </rect>
    </property>
    <property name="text">
-    <string>从excel导入</string>
+    <string>从txt导入</string>
    </property>
   </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>80</y>
+     <y>100</y>
      <width>81</width>
      <height>16</height>
     </rect>
@@ -78,7 +78,7 @@
   <widget class="QLabel" name="label_6">
    <property name="geometry">
     <rect>
-     <x>290</x>
+     <x>240</x>
      <y>60</y>
      <width>91</width>
      <height>16</height>
@@ -91,7 +91,7 @@
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>330</x>
+     <x>280</x>
      <y>20</y>
      <width>31</width>
      <height>20</height>
@@ -130,7 +130,7 @@
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>80</x>
      <y>20</y>
      <width>47</width>
      <height>20</height>
@@ -143,7 +143,7 @@
   <widget class="QLineEdit" name="Edit_UserName">
    <property name="geometry">
     <rect>
-     <x>180</x>
+     <x>140</x>
      <y>20</y>
      <width>113</width>
      <height>20</height>
@@ -156,20 +156,20 @@
   <widget class="QPushButton" name="Btn_StartRob">
    <property name="geometry">
     <rect>
-     <x>530</x>
+     <x>520</x>
      <y>50</y>
-     <width>151</width>
+     <width>71</width>
      <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>开始抢购</string>
+    <string>立即开始</string>
    </property>
   </widget>
   <widget class="QPushButton" name="Btn_AddAccount">
    <property name="geometry">
     <rect>
-     <x>530</x>
+     <x>490</x>
      <y>20</y>
      <width>75</width>
      <height>23</height>
@@ -185,14 +185,14 @@
      <x>10</x>
      <y>340</y>
      <width>721</width>
-     <height>121</height>
+     <height>161</height>
     </rect>
    </property>
   </widget>
   <widget class="QTimeEdit" name="Time_StartRob">
    <property name="geometry">
     <rect>
-     <x>190</x>
+     <x>140</x>
      <y>60</y>
      <width>81</width>
      <height>22</height>
@@ -203,9 +203,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>100</y>
+     <y>120</y>
      <width>721</width>
-     <height>211</height>
+     <height>191</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -218,14 +218,105 @@
   <widget class="QPushButton" name="Btn_StopAll">
    <property name="geometry">
     <rect>
-     <x>690</x>
+     <x>600</x>
      <y>50</y>
      <width>41</width>
-     <height>28</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
     <string>停止</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Btn_ClearLog">
+   <property name="geometry">
+    <rect>
+     <x>660</x>
+     <y>320</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>清除日志</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="ckBox_useProxy">
+   <property name="geometry">
+    <rect>
+     <x>660</x>
+     <y>20</y>
+     <width>70</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>使用代理</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>100</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>抢购时间范围</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lab_startTime">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>100</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>开始时间：</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lab_stopTime">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>100</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>结束时间：</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Btn_setTimeRangeAndRob">
+   <property name="geometry">
+    <rect>
+     <x>410</x>
+     <y>50</y>
+     <width>91</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>设置范围并开启</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="ckBox_PrintLog">
+   <property name="geometry">
+    <rect>
+     <x>660</x>
+     <y>40</y>
+     <width>70</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>打印日志</string>
    </property>
   </widget>
  </widget>

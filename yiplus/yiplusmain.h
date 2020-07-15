@@ -33,7 +33,7 @@ private:
     QString FileAccoutnPath;
     QStandardItemModel *LogListItem;
     QList<Account> Accounts;//所有用户
-
+    QTimer *timer;
     QList<changeThread*> ThreadPool;//用于同一销毁线程
 signals:
 
@@ -42,6 +42,9 @@ private slots:
     void on_Btn_StartRob_clicked();
     void on_Btn_LoginTest_clicked();
     void on_Btn_StopAll_clicked();
+    void on_Btn_ClearLog_clicked();
+    void on_ckBox_useProxy_stateChanged(int arg1);
+    void TimerFunc();
 };
 
 

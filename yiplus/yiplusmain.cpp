@@ -31,6 +31,9 @@ YiPlusMain::YiPlusMain(QWidget *parent) : QWidget(parent)
     //ui->Table_AllAccount->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     OnInit();
+    timer = new QTimer(this);
+    connect(timer,SIGNAL(timeout()),this,SLOT(TimerFunc()));
+    timer->start(500);
 }
 
 YiPlusMain::~YiPlusMain(){
@@ -43,8 +46,14 @@ YiPlusMain::~YiPlusMain(){
         File_RequestLog->close();
         delete(File_RequestLog);
     }
+    if(timer->isActive()){
+        timer->stop();
+    }
 }
-
+void YiPlusMain::TimerFunc(){
+    //监听是否打日志
+    LogHelper::Instance()->SetIsPrintLog(ui->ckBox_PrintLog->isChecked());
+}
 void YiPlusMain::OnInit(){
     QString accPath = CommonUtils::Instance()->GetExePath("account.txt");
     CommonUtils::Instance()->ImportAccount(accPath,&Accounts);
@@ -82,6 +91,8 @@ void YiPlusMain::on_Btn_StartRob_clicked()
                 memberInfo->passWord = Accounts[i].GetPassWord();
                 memberInfo->store = Accounts[i].GetStore();
                 changeThread *myThread = new changeThread(memberInfo);
+                bool isChecked = ui->ckBox_useProxy->isChecked();
+                myThread->setUseProxy(isChecked);
                 ThreadPool.push_back(myThread);
 
                 myThread->start();
@@ -100,6 +111,8 @@ void YiPlusMain::on_Btn_LoginTest_clicked()
     memberInfo->passWord = passWord;
     memberInfo->store = "001";
     changeThread *myThread = new changeThread(memberInfo);
+    bool isChecked = ui->ckBox_useProxy->isChecked();
+    myThread->setUseProxy(isChecked);
     ThreadPool.push_back(myThread);
     myThread->start();
 }
@@ -109,12 +122,28 @@ void YiPlusMain::on_Btn_StopAll_clicked()
     if(ThreadPool.size() > 0){
         for(int i = 0; i < ThreadPool.size(); i++){
             changeThread *myThread = ThreadPool.front();
-            if(!myThread->isStop){
-                myThread->isStop = true;
+            if(!myThread->getStopStatus()){
+                myThread->setStopValue(true);
             }
-            myThread->exit();
             myThread->wait();
             ThreadPool.pop_front();
         }
+    }
+}
+
+void YiPlusMain::on_Btn_ClearLog_clicked()
+{
+    QStandardItemModel *model = dynamic_cast<QStandardItemModel*>(ui->List_Logs->model());
+    int rowCount = ui->List_Logs->model()->rowCount();
+    for(int i = 0; i < rowCount; i++){
+        model->removeRow(i);
+    }
+}
+
+void YiPlusMain::on_ckBox_useProxy_stateChanged(int arg1)
+{
+    bool isChecked = ui->ckBox_useProxy->isChecked();
+    for(int i = 0; i < ThreadPool.count(); i++){
+        ThreadPool[i]->setUseProxy(isChecked);
     }
 }
