@@ -114,6 +114,7 @@ void YiPlusMain::on_Btn_LoginTest_clicked()
     changeThread *myThread = new changeThread(memberInfo);
     bool isChecked = ui->ckBox_useProxy->isChecked();
     myThread->setUseProxy(isChecked);
+    myThread->setIsLoginTest(true);
     ThreadPool.push_back(myThread);
     myThread->start();
 }
@@ -121,7 +122,7 @@ void YiPlusMain::on_Btn_LoginTest_clicked()
 void YiPlusMain::on_Btn_StopAll_clicked()
 {
     if(ThreadPool.size() > 0){
-        for(int i = 0; i < ThreadPool.size(); i++){
+        for(int i = 0; i <= ThreadPool.size(); i++){
             changeThread *myThread = ThreadPool.front();
             if(!myThread->getStopStatus()){
                 myThread->setStopValue(true);

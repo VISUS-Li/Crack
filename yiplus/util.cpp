@@ -96,6 +96,9 @@ bool CommonUtils::ImportAccount(QString filePath, QList<Account> *accountList){
     for(int i = 0; i < allAccountList.count(); i++){
         QString accountStr = allAccountList[i];
         QStringList splitAccount = accountStr.split(",",QString::SkipEmptyParts);
+        if(splitAccount.count() <= 0){
+            return false;
+        }
         Account newAccount(splitAccount[0],splitAccount[1],"001");
         if(!AccountExist(*accountList,newAccount.GetPoneNumber())){
             accountList->push_back(newAccount);
@@ -432,9 +435,9 @@ bool CommonUtils::ParseProxyStatus(QString proxyStr, JsonClass& ReplayJson){
         return false;
     }
     QStringList ip_port_list = proxyStr.split(":");
-    if(ip_port_list.count() <= 0){
+    if(ip_port_list.count() <= 1){
         QStringList error = proxyStr.split("!");
-        if(error.count() <= 0 || error.count() > 4){
+        if(error.count() <= 1 || error.count() > 4){
             LogHelper::Instance()->AppendLogList("获取代理服务器失败");
             ReplayJson.proxyStatus.ProxyError = "解析代理服务器返回值错误";
             return false;
@@ -473,6 +476,11 @@ bool CommonUtils::WriteReplayLog(JsonClass replayJson, QString path){
     writeStr += nowTimeStr+"\n";
     writeStr += "ProxyIp:" + replayJson.proxyStatus.ProxyIp + ":" + QString::number(replayJson.proxyStatus.ProxyPort) +"\n";
     writeStr += "ProxyError:" + replayJson.proxyStatus.ProxyError + "\n";
+    QString proxyStatus = "不启用代理";
+    if(replayJson.proxyStatus.Enable){
+        proxyStatus = "启用代理";
+    }
+    writeStr += proxyStatus + "\n";
     writeStr += "==========================================\n";
 
     //基本信息

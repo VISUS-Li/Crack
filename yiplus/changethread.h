@@ -34,6 +34,9 @@ public:
         useProxy = flag;
         mutex.unlock();
     }
+    inline void setIsLoginTest(bool flag){
+        isLogInTest = flag;
+    }
 
 private:
     bool isStop = false;

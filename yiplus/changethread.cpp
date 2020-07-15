@@ -35,6 +35,7 @@ void  changeThread::run()
             }else{
                 LogHelper::Instance()->AppendLogList("账号:"+userID+",密码:"+passWord+",登录测试失败!,token:"+jsonReplay.loginJson.Token);
             }
+            isLogInTest = false;
             return;
     }else{
         signIN();
@@ -53,8 +54,10 @@ void  changeThread::run()
                 cnt = 0;
                 signIN();
             }
-
-            CommonUtils::Instance()->WriteReplayLog(jsonReplay,userID+".txt");
+            if(!changeRet){
+                jsonReplay.proxyStatus.Enable = useProxy;
+                CommonUtils::Instance()->WriteReplayLog(jsonReplay,userID+".txt");
+            }
         }
     }
 }
@@ -70,7 +73,7 @@ bool changeThread::getProxyIp(QString &proxyIp, int &proxyPort){
 
     QUrl url(reqUrl);
     QNetworkRequest req(url);
-    QTimer::singleShot(500,&eventLoop,SLOT(quit()));
+    QTimer::singleShot(1000,&eventLoop,SLOT(quit()));
     QNetworkReply *reply = manager.get(req);
     eventLoop.exec();
     QByteArray arry = reply->readAll();
@@ -80,7 +83,7 @@ bool changeThread::getProxyIp(QString &proxyIp, int &proxyPort){
     }
 
     //解析返回的IP
-    CommonUtils::Instance()->ParseProxyStatus("error!用户名或密码错误",jsonReplay);
+    CommonUtils::Instance()->ParseProxyStatus(arry,jsonReplay);
     proxyIp = jsonReplay.proxyStatus.ProxyIp;
     proxyPort = jsonReplay.proxyStatus.ProxyPort;
 }
@@ -343,7 +346,7 @@ bool changeThread::replyGoodChange(QByteArray arry)
         requestRet = true;
         return true;
     }else{
-        LogHelper::Instance()->AppendLogList("兑换商品失败，message："+jsonReplay.moutaiJson.Message);
+        LogHelper::Instance()->AppendLogList("兑换商品失败，message："+jsonReplay.goodChangedJson.Message);
         //getGoodsInfo();
     }
     if(jsonReplay.goodChangedJson.Message == "用户信息过期" || jsonReplay.goodChangedJson.IsExpired == "02"){
