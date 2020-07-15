@@ -80,7 +80,7 @@ bool changeThread::getProxyIp(QString &proxyIp, int &proxyPort){
     }
 
     //解析返回的IP
-    CommonUtils::Instance()->ParseProxyStatus(arry,jsonReplay);
+    CommonUtils::Instance()->ParseProxyStatus("error!用户名或密码错误",jsonReplay);
     proxyIp = jsonReplay.proxyStatus.ProxyIp;
     proxyPort = jsonReplay.proxyStatus.ProxyPort;
 }

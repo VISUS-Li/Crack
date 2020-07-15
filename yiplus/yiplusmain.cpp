@@ -68,7 +68,8 @@ void YiPlusMain::on_Btn_AddAccount_clicked()
         QMessageBox::information(NULL,"添加用户","用户名或密码不能为空");
         return;
     }
-
+    Account newAccount(userName,passWord,"001");
+    CommonUtils::Instance()->InsertDefAccountDoc(newAccount);
 }
 
 
