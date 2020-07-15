@@ -19,6 +19,22 @@ namespace Utils {
 }
 
 class JsonClass{
+    typedef struct stu_ProxyIpStatus{
+        QString ProxyIp;
+        int     ProxyPort;
+        QString ProxyError;
+        bool    Enable;
+        stu_ProxyIpStatus(){
+            Reset();
+        }
+        void Reset(){
+            ProxyIp = "";
+            ProxyPort = 0;
+            ProxyError = "";
+            Enable = false;
+        }
+    }ProxyStatus;
+
     typedef struct stu_LoginJson{
        QString ResFlag;//请求结果
        QString Message;
@@ -166,6 +182,7 @@ public:
     MoutaiGood moutaiJson;
     GoodListJson goodListJson;
     ChangeJson goodChangedJson;//兑换后返回的信息
+    ProxyStatus proxyStatus;//获取代理服务器的情况
 
     void Reset(){
         loginJson.Reset();
@@ -202,7 +219,7 @@ public:
     bool ParseGoodListsJson(QString goodsListStr, JsonClass& ReplayJson);//获取商品列表返回的json
     bool ParseGoodItemJson(QString goodItemStr, JsonClass& ReplayJson);//获取商品详情返回的json
     bool ParseChangeGoodJson(QString changeStr, JsonClass& ReplayJson);//兑换商品返回的json
-
+    bool ParseProxyStatus(QString proxyStr, JsonClass& ReplayJson);//获取代理服务器IP返回的TXT
     void inline SetDefAccDocPath(QString path){
         defAccDocPath = path;
     }

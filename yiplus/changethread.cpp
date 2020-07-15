@@ -23,6 +23,7 @@ void changeThread::setStopValue(bool value){
 
 void  changeThread::run()
 {
+    getProxyIp(proxyIp,proxyPort);
     jsonReplay.Reset();
     int cnt=0;
     if(isLogInTest){
@@ -36,7 +37,7 @@ void  changeThread::run()
             }
             return;
     }else{
-        //signIN();
+        signIN();
         while (1) {
             if(loginRet && !changeRet) {//如果账号登录了，并且没有兑换成功，开始兑换流程
                     changeRet = getHomePage();
@@ -49,11 +50,39 @@ void  changeThread::run()
             mutex.unlock();
 
             if((!loginRet && !changeRet) || cnt > 5){
+                cnt = 0;
                 signIN();
             }
+
             CommonUtils::Instance()->WriteReplayLog(jsonReplay,userID+".txt");
         }
     }
+}
+
+
+bool changeThread::getProxyIp(QString &proxyIp, int &proxyPort){
+    QString reqUrl = ProxyUrl + "username=visus&pwd=e35346ede433742757d2ba48550edfc8&geshi=1&fenge=3&fengefu=&getnum=1";
+
+    QEventLoop eventLoop;
+    QNetworkAccessManager manager;
+    QObject::connect(&manager, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
+    QObject::connect(this,SIGNAL(changeThread::UserStop),&eventLoop,SLOT(quit()));
+
+    QUrl url(reqUrl);
+    QNetworkRequest req(url);
+    QTimer::singleShot(500,&eventLoop,SLOT(quit()));
+    QNetworkReply *reply = manager.get(req);
+    eventLoop.exec();
+    QByteArray arry = reply->readAll();
+    if(reply){
+        delete reply;
+        reply = NULL;
+    }
+
+    //解析返回的IP
+    CommonUtils::Instance()->ParseProxyStatus(arry,jsonReplay);
+    proxyIp = jsonReplay.proxyStatus.ProxyIp;
+    proxyPort = jsonReplay.proxyStatus.ProxyPort;
 }
 
 QByteArray changeThread::Post(QString uri, QString header)
@@ -61,9 +90,9 @@ QByteArray changeThread::Post(QString uri, QString header)
     QEventLoop eventLoop;
     QNetworkAccessManager manager;
 
-    if(useProxy){
+    if(useProxy && (proxyIp != "" && proxyPort != 0)){
         QNetworkProxy proxy;
-        proxy.setType(QNetworkProxy::HttpProxy);
+        proxy.setType(QNetworkProxy::HttpProxy);      
         proxy.setHostName(proxyIp);
         proxy.setPort(proxyPort);
         manager.setProxy(proxy);
@@ -77,10 +106,14 @@ QByteArray changeThread::Post(QString uri, QString header)
     request.setRawHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 13_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Html5Plus/1.0 (Immersed/44)");
     //request.setRawHeader("Accept","application/json,text/javascript,*/*;q=0.01");
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    QTimer::singleShot(1500,&eventLoop,SLOT(quit()));
+    QTimer::singleShot(500,&eventLoop,SLOT(quit()));
     QNetworkReply *reply = manager.post(request, header.toUtf8());
     eventLoop.exec();
     QByteArray arry = reply->readAll();
+    if(reply){
+        delete reply;
+        reply = NULL;
+    }
     //LogHelper::Instance()->AppendLogList(arry);
     return arry;
 }
@@ -88,7 +121,7 @@ QByteArray changeThread::Post(QString uri, QString header)
 QByteArray changeThread::Post_FormData(QString uri, QString form){
     QEventLoop eventLoop;
     QNetworkAccessManager manager;
-    if(useProxy){
+    if(useProxy && (proxyIp != "" && proxyPort != 0)){
         QNetworkProxy proxy;
         proxy.setType(QNetworkProxy::HttpProxy);
         proxy.setHostName(proxyIp);
@@ -104,10 +137,14 @@ QByteArray changeThread::Post_FormData(QString uri, QString form){
     request.setRawHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 13_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Html5Plus/1.0 (Immersed/44)");
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/form-data");
 
-    QTimer::singleShot(1500,&eventLoop,SLOT(quit()));
+    QTimer::singleShot(500,&eventLoop,SLOT(quit()));
     QNetworkReply *reply = manager.post(request, form.toUtf8());
     eventLoop.exec();
     QByteArray arry = reply->readAll();
+    if(reply){
+        delete reply;
+        reply = NULL;
+    }
     //LogHelper::Instance()->AppendLogList(arry);
     return arry;
 }
@@ -118,7 +155,7 @@ QByteArray changeThread::Get(QString uri)
 {
     QEventLoop eventLoop;
     QNetworkAccessManager mgr;
-    if(useProxy){
+    if(useProxy && (proxyIp != "" && proxyPort != 0)){
         QNetworkProxy proxy;
         proxy.setType(QNetworkProxy::HttpProxy);
         proxy.setHostName(proxyIp);
@@ -135,6 +172,10 @@ QByteArray changeThread::Get(QString uri)
     QNetworkReply *reply = mgr.get(req);
     eventLoop.exec();
     QByteArray arry = reply->readAll();
+    if(reply){
+        delete reply;
+        reply = NULL;
+    }
     return arry;
 }
 
@@ -149,7 +190,6 @@ bool changeThread::changeGoods()
 
         QByteArray arry = Post_FormData(changeURL,paramUrl);
         return replyGoodChange(arry);
-
 }
 
 

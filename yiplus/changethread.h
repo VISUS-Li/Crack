@@ -42,7 +42,7 @@ private:
     QString userID, memberID, passWord, token, changeList, detail, change, store;
     QString recordid = "544", goodid = "617", eid = "999", isspike = "0", changeCount = "1";
     QString proxyIp = "";
-    int proxyPort = 766;
+    int proxyPort = 0;
     bool useProxy = false;
     QMutex mutex;
 
@@ -59,6 +59,8 @@ private:
     bool getGoodsList();
     bool getGoodsInfo();
     bool changeGoods();
+
+    bool getProxyIp(QString &proxyIp, int &proxyPort);
 
 private slots:
     bool replyFinished(QByteArray arry);

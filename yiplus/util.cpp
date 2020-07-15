@@ -426,6 +426,33 @@ bool CommonUtils::ParseChangeGoodJson(QString changeStr, JsonClass& ReplayJson){
     }
 }
 
+bool CommonUtils::ParseProxyStatus(QString proxyStr, JsonClass& ReplayJson){
+    if(proxyStr == ""){
+        LogHelper::Instance()->AppendLogList("获取代理服务器失败");
+        return false;
+    }
+    QStringList ip_port_list = proxyStr.split(":");
+    if(ip_port_list.count() <= 0){
+        QStringList error = proxyStr.split("!");
+        if(error.count() <= 0 || error.count() > 4){
+            LogHelper::Instance()->AppendLogList("获取代理服务器失败");
+            ReplayJson.proxyStatus.ProxyError = "解析代理服务器返回值错误";
+            return false;
+        }
+        if(error.count() == 2){
+            ReplayJson.proxyStatus.ProxyError = error[1];
+            return true;
+        }
+        if(error.count() >2 && error.count() <= 4){
+            ReplayJson.proxyStatus.ProxyError = error[2];
+            return true;
+        }
+    }
+    ReplayJson.proxyStatus.ProxyIp = ip_port_list[0];
+    ReplayJson.proxyStatus.ProxyPort = ip_port_list[1].toInt();
+    return true;
+}
+
 bool CommonUtils::WriteReplayLog(JsonClass replayJson, QString path){
     QString fullPath = "";
     if(path == ""){
@@ -444,6 +471,8 @@ bool CommonUtils::WriteReplayLog(JsonClass replayJson, QString path){
     writeStr += "\n\n\n\n\n";
     writeStr += "==========================================\n";
     writeStr += nowTimeStr+"\n";
+    writeStr += "ProxyIp:" + replayJson.proxyStatus.ProxyIp + ":" + QString::number(replayJson.proxyStatus.ProxyPort) +"\n";
+    writeStr += "ProxyError:" + replayJson.proxyStatus.ProxyError + "\n";
     writeStr += "==========================================\n";
 
     //基本信息
