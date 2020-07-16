@@ -12,18 +12,12 @@ ExcelHelper *ExcelHelper::m_Excel = NULL;
 
 CommonUtils::CommonUtils()
 {
-    DefualtFile = NULL;
     defAccDocPath = GetExePath("account.txt");
 }
 
 void CommonUtils::Relese(){
     delete m_Comm;
     m_Comm = NULL;
-    if(DefualtFile){
-        DefualtFile->close();
-        delete DefualtFile;
-        DefualtFile = NULL;
-    }
 }
 
 //外界需要free掉
@@ -63,34 +57,31 @@ QString CommonUtils::GetExePath(QString fileName){
     return qexeFullPath;
 }
 
-bool CommonUtils::AccountExist(QList<Account> account,QString userID){
+bool CommonUtils::AccountExist(QList<Account> account,QString userID, Account *retAccount){
     for(int i = 0; i < account.count(); i++){
         if(account[i].GetPoneNumber() == userID){
+            if(retAccount != NULL){
+                *retAccount = account[i];
+            }
             return true;
         }
     }
     return false;
 }
 bool CommonUtils::ImportAccount(QString filePath, QList<Account> *accountList){
-    File = new QFile(filePath);
-    if(!File->open(QIODevice::ReadOnly | QIODevice::Text)){
-        delete File;
-        File = NULL;
+    QFile File(filePath);
+    if(!File.open(QIODevice::ReadOnly | QIODevice::Text)){
         return false;
     }
-    QByteArray allTxt = File->readAll();
+    QByteArray allTxt = File.readAll();
     if(allTxt == ""){
-        File->close();
-        delete File;
-        File = NULL;
+        File.close();
         return false;
     }
     QString allStr(allTxt);
     QStringList allAccountList = allStr.split("\n",QString::SkipEmptyParts);
     if(allAccountList.count() <= 0){
-        File->close();
-        delete File;
-        File = NULL;
+        File.close();
         return false;
     }
 
@@ -98,19 +89,17 @@ bool CommonUtils::ImportAccount(QString filePath, QList<Account> *accountList){
         QString accountStr = allAccountList[i];
         QStringList splitAccount = accountStr.split(",",QString::SkipEmptyParts);
         if(splitAccount.count() <= 0){
+            File.close();
             return false;
         }
         Account newAccount(splitAccount[0],splitAccount[1],"001");
         if(!AccountExist(*accountList,newAccount.GetPoneNumber())){
             accountList->push_back(newAccount);
-            InsertDefAccountDoc(newAccount);
             LogHelper::Instance()->AppendLogList(splitAccount[0]+"-"+splitAccount[1]);
         }
     }
-
-    File->close();
-    delete File;
-    File = NULL;
+    if(File.isOpen())
+        File.close();
 
     if(accountList->count() <= 0){
         return false;
@@ -118,26 +107,47 @@ bool CommonUtils::ImportAccount(QString filePath, QList<Account> *accountList){
     return true;
 }
 
-bool CommonUtils::InsertDefAccountDoc(Account account){
-    if(!DefualtFile){
-        DefualtFile = new QFile(defAccDocPath);
-        if(!DefualtFile->open(QIODevice::ReadWrite | QIODevice::Append)){
+bool CommonUtils::InsertDefAccountDoc(Account account, QList<Account> *accountList){
+    QString writeStr = account.GetPoneNumber()+","+account.GetPassWord()+"\n";
+    Account* existAccount = new Account("","","");
+    if(!AccountExist(*accountList,account.GetPoneNumber(),existAccount)){
+        delete existAccount;
+        //如果账号不存在
+        QFile accountFile(defAccDocPath);
+        if(!accountFile.open(QIODevice::ReadWrite | QIODevice::Append)){
             return false;
         }
-    }
-    QString writeStr = account.GetPoneNumber()+","+account.GetPassWord()+"\n";
-    QByteArray allTxt = DefualtFile->readAll();
-    QString allStr(allTxt);
-    if(allStr == ""){
-        //读出来是空文件，直接写入
-        DefualtFile->write(writeStr.toUtf8());
+
+        accountFile.write(writeStr.toUtf8());//写入文件中
+        accountList->push_back(account);//加入缓存中
+        if(accountFile.isOpen())
+            accountFile.close();
+        return true;
     }else{
-        //读出来非空文件，先判断是否有重复的
-        int index = allStr.indexOf(writeStr, 0, Qt::CaseInsensitive);
-        if(index = -1){
-            DefualtFile->write(writeStr.toUtf8());
+        //如果账号存在，检查密码
+        if(account.GetPassWord() != existAccount->GetPassWord()){
+            //密码已改
+            delete existAccount;
+            if(QFile::remove(defAccDocPath)){
+                QFile accountFile(defAccDocPath);
+                if(!accountFile.open(QIODevice::ReadWrite | QIODevice::Append)){
+                    return false;
+                }
+                for(QList<Account>::iterator iter = accountList->begin(); iter != accountList->end(); iter++){
+                    if(iter->GetPoneNumber() == account.GetPoneNumber()){
+                        iter->SetPassWord(account.GetPassWord());
+                    }
+                    QString str = iter->GetPoneNumber()+","+iter->GetPassWord()+"\n";
+                    accountFile.write(writeStr.toUtf8());//写入文件中
+                }
+                accountFile.close();
+            }else{
+                return false;
+            }
         }
     }
+
+    return true;
 }
 
 

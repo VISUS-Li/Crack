@@ -25,6 +25,7 @@ public:
 private:
 
     void OnInit();
+    void ShowAccountInTable();
 
 private:
     Ui::YiPlusMain *ui;

@@ -17,13 +17,13 @@ YiPlusMain::YiPlusMain(QWidget *parent) : QWidget(parent)
     LogHelper::Instance()->SetLogListModel(LogListItem);
 
     QStringList tableHeader;
-    tableHeader << "账号" << "会员ID" << "密码" << "token";
+    tableHeader << "账号" << "密码" << "启用？";
 
     ui->Table_AllAccount->horizontalHeader()->setDefaultSectionSize(180);
-    ui->Table_AllAccount->setColumnCount(4);
+    ui->Table_AllAccount->setColumnCount(3);
     ui->Table_AllAccount->setHorizontalHeaderLabels(tableHeader);
-    ui->Table_AllAccount->verticalHeader()->setVisible(false);
-    ui->Table_AllAccount->setShowGrid(false);
+    ui->Table_AllAccount->verticalHeader()->setVisible(true);
+    ui->Table_AllAccount->setShowGrid(true);
     ui->Table_AllAccount->horizontalHeader()->setStyleSheet("QHeaderView::section{background::skyblue;}");
     ui->Table_AllAccount->setEditTriggers(QAbstractItemView::NoEditTriggers);
     int iRow = ui->Table_AllAccount->rowCount();
@@ -33,7 +33,7 @@ YiPlusMain::YiPlusMain(QWidget *parent) : QWidget(parent)
     OnInit();
     timer = new QTimer(this);
     connect(timer,SIGNAL(timeout()),this,SLOT(TimerFunc()));
-    timer->start(500);
+    timer->start(600);
 }
 
 YiPlusMain::~YiPlusMain(){
@@ -57,7 +57,31 @@ void YiPlusMain::TimerFunc(){
 void YiPlusMain::OnInit(){
     QString accPath = CommonUtils::Instance()->GetExePath("account.txt");
     CommonUtils::Instance()->ImportAccount(accPath,&Accounts);
+    ShowAccountInTable();
 
+}
+
+void YiPlusMain::ShowAccountInTable(){
+    ui->Table_AllAccount->clear();
+    int row = 0;
+    for(QList<Account>::iterator iter = Accounts.begin(); iter != Accounts.end(); iter++){
+        int col = 0;
+        for(int i = 0; i < 3; i++){
+            QTableWidgetItem* item;
+            if(i != 2){
+                item = new QTableWidgetItem(iter->GetPoneNumber());
+            }else{
+                QString enable = "不启用";
+                if(iter->isEnable()){
+                    enable = "启用";
+                }
+                item = new QTableWidgetItem(enable);
+            }
+            ui->Table_AllAccount->setItem(row,col,item);
+            col++;
+        }
+        row++;
+    }
 }
 
 void YiPlusMain::on_Btn_AddAccount_clicked()
@@ -69,7 +93,8 @@ void YiPlusMain::on_Btn_AddAccount_clicked()
         return;
     }
     Account newAccount(userName,passWord,"001");
-    CommonUtils::Instance()->InsertDefAccountDoc(newAccount);
+    CommonUtils::Instance()->InsertDefAccountDoc(newAccount,&Accounts);
+    ShowAccountInTable();
 }
 
 

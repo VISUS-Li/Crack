@@ -207,11 +207,11 @@ public:
 
     char* QString2Char(QString str);
     int GetAccEnableCounts(QList<Account> account);//获得可用的账户数
-    bool AccountExist(QList<Account> account,QString userID);
+    bool AccountExist(QList<Account> account,QString userID, Account *retAccount = NULL);
     bool IsFilorDirExist(QString path);
     QString GetExePath(QString fileName = "");
     bool ImportAccount(QString filePath, QList<Account> *accountList);
-    bool InsertDefAccountDoc(Account account);
+    bool InsertDefAccountDoc(Account account, QList<Account> *accountList);
     bool WriteReplayLog(JsonClass replayJson, QString path = "");//每个账号单独写一个文件
 
     bool ParseLoginJson(QString loginStr, JsonClass& ReplayJson);//登录返回的json
@@ -227,8 +227,8 @@ private:
     QJsonObject GetJsonObject(QString JsonStr);
     static CommonUtils* m_Comm;
 
-    QFile *File;
-    QFile *DefualtFile;
+    //QFile *File;
+    //QFile *DefualtFile;
     QString defAccDocPath;//默认的账户文档地址
 
     //JsonClass ReplayJson;

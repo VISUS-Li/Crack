@@ -23,17 +23,9 @@ void changeThread::setStopValue(bool value){
 
 void  changeThread::run()
 {
-    while(1){
-        getProxyIp(proxyIp,proxyPort);
-        Get_IPLocationTest();
-        if(isStop){
-            break;
-        }
-        msleep(1000);
-    }
-
-#ifdef TEST
     jsonReplay.Reset();
+    getProxyIp(proxyIp,proxyPort);
+    Get_IPLocationTest();
     int cnt=0;
     if(isLogInTest){
             signIN();
@@ -72,7 +64,6 @@ void  changeThread::run()
             msleep(200);
         }
     }
-#endif
 }
 
 
@@ -179,8 +170,9 @@ QByteArray changeThread::Get_IPLocationTest(){
 
     QObject::connect(&mgr, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
     QObject::connect(this,SIGNAL(changeThread::UserStop),&eventLoop,SLOT(quit()));
-    //QString uri = "http://202020.ip138.com";
-    QString uri = "https://www.jianshu.com/captchas/new?t=1594895617633-md3";
+    QString uri = "http://202020.ip138.com";
+    //QString uri = "https://www.jianshu.com/captchas/new?t=1594895617633-md3";
+    //QString uri = "https://w.coral.qq.com/article/comment";
     QUrl url(uri);
     QNetworkRequest req(url);
     QTimer::singleShot(1000,&eventLoop,SLOT(quit()));
@@ -206,8 +198,6 @@ QByteArray changeThread::Get_IPLocationTest(){
     QByteArray retArry = QString(strIP+":"+strLocation).toUtf8();
     LogHelper::Instance()->AppendLogList(userID+":"+retArry);
     return retArry;
-
-
 }
 
 QByteArray changeThread::Get(QString uri)
@@ -399,6 +389,7 @@ bool changeThread::replyGoodChange(QByteArray arry)
     QString replyStr(arry);
     CommonUtils::Instance()->ParseChangeGoodJson(replyStr,jsonReplay);
     if(jsonReplay.goodChangedJson.flag == "true" && jsonReplay.goodChangedJson.Message == "兑换成功"){
+        LogHelper::Instance()->AppendLogList(userID+":兑换成功");
         requestRet = true;
         return true;
     }else{
