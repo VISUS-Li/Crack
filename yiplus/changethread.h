@@ -56,6 +56,7 @@ private:
     QByteArray Post(QString uri, QString header);
     QByteArray Post_FormData(QString uri, QString form);
     QByteArray Get(QString uri);
+    QByteArray Get_IPLocationTest();
 
     bool signIN();
     bool getHomePage();

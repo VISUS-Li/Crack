@@ -97,6 +97,10 @@ void YiPlusMain::on_Btn_StartRob_clicked()
                 ThreadPool.push_back(myThread);
 
                 myThread->start();
+
+                QEventLoop eventloop;
+                QTimer::singleShot(300, &eventloop, SLOT(quit()));
+                eventloop.exec();
             }
         }
     }

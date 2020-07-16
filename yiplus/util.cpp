@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QCoreApplication>
 #include <QList>
+#include <QTextCodec>
 
 LogHelper *LogHelper::m_log = NULL;
 CommonUtils *CommonUtils::m_Comm = NULL;
@@ -443,11 +444,12 @@ bool CommonUtils::ParseProxyStatus(QString proxyStr, JsonClass& ReplayJson){
             return false;
         }
         if(error.count() == 2){
-            ReplayJson.proxyStatus.ProxyError = error[1];
+            ReplayJson.proxyStatus.ProxyError = QTextCodec::codecForName("GBK")->toUnicode(error[1].toUtf8());
             return true;
         }
         if(error.count() >2 && error.count() <= 4){
-            ReplayJson.proxyStatus.ProxyError = error[2];
+            QByteArray arry = error[2].toUtf8();
+            ReplayJson.proxyStatus.ProxyError = QTextCodec::codecForName("GBK")->toUnicode(error[2].toUtf8());
             return true;
         }
     }

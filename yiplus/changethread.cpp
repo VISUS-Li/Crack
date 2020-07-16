@@ -23,7 +23,16 @@ void changeThread::setStopValue(bool value){
 
 void  changeThread::run()
 {
-    getProxyIp(proxyIp,proxyPort);
+    while(1){
+        getProxyIp(proxyIp,proxyPort);
+        Get_IPLocationTest();
+        if(isStop){
+            break;
+        }
+        msleep(1000);
+    }
+
+#ifdef TEST
     jsonReplay.Reset();
     int cnt=0;
     if(isLogInTest){
@@ -55,11 +64,15 @@ void  changeThread::run()
                 signIN();
             }
             if(!changeRet){
-                jsonReplay.proxyStatus.Enable = useProxy;
+                if(useProxy && (proxyIp != "" && proxyPort != 0)){
+                    jsonReplay.proxyStatus.Enable = true;
+                }
                 CommonUtils::Instance()->WriteReplayLog(jsonReplay,userID+".txt");
             }
+            msleep(200);
         }
     }
+#endif
 }
 
 
@@ -153,6 +166,49 @@ QByteArray changeThread::Post_FormData(QString uri, QString form){
 }
 
 
+QByteArray changeThread::Get_IPLocationTest(){
+    QEventLoop eventLoop;
+    QNetworkAccessManager mgr;
+
+    QNetworkProxy proxy;
+    proxy.setType(QNetworkProxy::HttpProxy);
+    proxy.setHostName(proxyIp);
+    proxy.setPort(proxyPort);
+    mgr.setProxy(proxy);
+
+
+    QObject::connect(&mgr, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
+    QObject::connect(this,SIGNAL(changeThread::UserStop),&eventLoop,SLOT(quit()));
+    //QString uri = "http://202020.ip138.com";
+    QString uri = "https://www.jianshu.com/captchas/new?t=1594895617633-md3";
+    QUrl url(uri);
+    QNetworkRequest req(url);
+    QTimer::singleShot(1000,&eventLoop,SLOT(quit()));
+    QNetworkReply *reply = mgr.get(req);
+    eventLoop.exec();
+    QByteArray arry = reply->readAll();
+    if(reply){
+        delete reply;
+        reply = NULL;
+    }
+    LogHelper::Instance()->AppendLogList(arry);
+    QString repStr(arry);
+    int nbodyS = repStr.indexOf("<body>");
+    int nbodyE = repStr.indexOf("</body>");
+    QString strBody = repStr.mid(nbodyS,nbodyE);
+    int npS = strBody.indexOf("<p");
+    int npE = strBody.indexOf("</p>");
+    QString strP = strBody.mid(npS,npE);
+    int naS = strP.indexOf("\"_blank\">");
+    int naE = strP.indexOf("</a>");
+    QString strIP = strP.mid(naS+9,naE);
+    QString strLocation = strP.mid(naE+5);
+    QByteArray retArry = QString(strIP+":"+strLocation).toUtf8();
+    LogHelper::Instance()->AppendLogList(userID+":"+retArry);
+    return retArry;
+
+
+}
 
 QByteArray changeThread::Get(QString uri)
 {
