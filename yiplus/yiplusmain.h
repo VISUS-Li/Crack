@@ -33,6 +33,7 @@ private:
     QFile *File_RequestLog;
     QString FileAccoutnPath;
     QStandardItemModel *LogListItem;
+    QStandardItemModel *tableModel;//用户表格
     QList<Account> Accounts;//所有用户
     QTimer *timer;
     QList<changeThread*> ThreadPool;//用于同一销毁线程
@@ -45,6 +46,7 @@ private slots:
     void on_Btn_StopAll_clicked();
     void on_Btn_ClearLog_clicked();
     void on_ckBox_useProxy_stateChanged(int arg1);
+    void view_select_check();//表格被选中
     void TimerFunc();
 };
 

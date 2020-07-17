@@ -16,20 +16,6 @@ YiPlusMain::YiPlusMain(QWidget *parent) : QWidget(parent)
     }
     LogHelper::Instance()->SetLogListModel(LogListItem);
 
-    QStringList tableHeader;
-    tableHeader << "账号" << "密码" << "启用？";
-
-    ui->Table_AllAccount->horizontalHeader()->setDefaultSectionSize(180);
-    ui->Table_AllAccount->setColumnCount(3);
-    ui->Table_AllAccount->setHorizontalHeaderLabels(tableHeader);
-    ui->Table_AllAccount->verticalHeader()->setVisible(true);
-    ui->Table_AllAccount->setShowGrid(true);
-    ui->Table_AllAccount->horizontalHeader()->setStyleSheet("QHeaderView::section{background::skyblue;}");
-    ui->Table_AllAccount->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    int iRow = ui->Table_AllAccount->rowCount();
-    ui->Table_AllAccount->insertRow(iRow+1);
-    //ui->Table_AllAccount->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
     OnInit();
     timer = new QTimer(this);
     connect(timer,SIGNAL(timeout()),this,SLOT(TimerFunc()));
@@ -53,31 +39,62 @@ YiPlusMain::~YiPlusMain(){
 void YiPlusMain::TimerFunc(){
     //监听是否打日志
     LogHelper::Instance()->SetIsPrintLog(ui->ckBox_PrintLog->isChecked());
+    //监听是否启用代理
+    for(QList<changeThread*>::iterator iter = ThreadPool.begin(); iter != ThreadPool.end(); iter++){
+    bool isChecked = ui->ckBox_useProxy->isChecked();
+    (*iter)->setUseProxy(isChecked);
+    }
+
 }
 void YiPlusMain::OnInit(){
+    {
+        tableModel = new QStandardItemModel;
+        tableModel->setColumnCount(3);
+        tableModel->setHeaderData(0, Qt::Horizontal, tr("账号"));
+        tableModel->setHeaderData(1, Qt::Horizontal, tr("密码"));
+        tableModel->setHeaderData(2, Qt::Horizontal, tr("启用?"));
+        ui->Table_AllAccount->setModel(tableModel);
+        ui->Table_AllAccount->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->Table_AllAccount->setColumnWidth(0, 250);
+        ui->Table_AllAccount->setColumnWidth(1, 250);
+        ui->Table_AllAccount->setColumnWidth(2, 250);
+        ui->Table_AllAccount->setSelectionBehavior(QAbstractItemView::SelectRows);
+        QItemSelectionModel * md = ui->Table_AllAccount->selectionModel();
+        connect(md,SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(view_select_check));
+    }
     QString accPath = CommonUtils::Instance()->GetExePath("account.txt");
     CommonUtils::Instance()->ImportAccount(accPath,&Accounts);
     ShowAccountInTable();
 
 }
+void YiPlusMain::view_select_check(){
+    ui->Btn_DelAccount->setEnabled(true);
+    int currentRow = ui->Table_AllAccount->currentIndex().row();
+    QModelIndex index = tableModel->index(currentRow,2);
+    //tableModel->
+    ui->Btn_EnableAccount->setEnabled(true);
+}
 
 void YiPlusMain::ShowAccountInTable(){
-    ui->Table_AllAccount->clear();
+    tableModel->removeRows(0,tableModel->rowCount());
     int row = 0;
     for(QList<Account>::iterator iter = Accounts.begin(); iter != Accounts.end(); iter++){
+        tableModel->insertRow(row);
         int col = 0;
         for(int i = 0; i < 3; i++){
-            QTableWidgetItem* item;
-            if(i != 2){
-                item = new QTableWidgetItem(iter->GetPoneNumber());
-            }else{
+            if(i == 0){
+                tableModel->setItem(row,col,new QStandardItem(iter->GetPoneNumber()));
+
+            }else if(i == 1){
+                tableModel->setItem(row,col,new QStandardItem(iter->GetPassWord()));
+            }else if(i == 2){
                 QString enable = "不启用";
                 if(iter->isEnable()){
                     enable = "启用";
+                    //tableModel->item(row,col)->setForeground(Qt::green);
                 }
-                item = new QTableWidgetItem(enable);
+                tableModel->setItem(row,col,new QStandardItem(enable));
             }
-            ui->Table_AllAccount->setItem(row,col,item);
             col++;
         }
         row++;
@@ -86,6 +103,7 @@ void YiPlusMain::ShowAccountInTable(){
 
 void YiPlusMain::on_Btn_AddAccount_clicked()
 {
+    ShowAccountInTable();
     QString userName = ui->Edit_UserName->text();
     QString passWord = ui->Edit_Password->text();
     if(userName == "" || passWord == ""){
@@ -100,6 +118,7 @@ void YiPlusMain::on_Btn_AddAccount_clicked()
 
 void YiPlusMain::on_Btn_StartRob_clicked()
 {
+    ShowAccountInTable();
     QString accPath = CommonUtils::Instance()->GetExePath("account.txt");
     CommonUtils::Instance()->ImportAccount(accPath,&Accounts);
     if(Accounts.size() <= 0 || CommonUtils::Instance()->GetAccEnableCounts(Accounts) <= 0){
@@ -133,6 +152,7 @@ void YiPlusMain::on_Btn_StartRob_clicked()
 
 void YiPlusMain::on_Btn_LoginTest_clicked()
 {
+    ShowAccountInTable();
     QString userName = ui->Edit_UserName->text();
     QString passWord = ui->Edit_Password->text();
     Account newAccount(userName,passWord,"001");
@@ -150,6 +170,7 @@ void YiPlusMain::on_Btn_LoginTest_clicked()
 
 void YiPlusMain::on_Btn_StopAll_clicked()
 {
+    ShowAccountInTable();
     if(ThreadPool.size() > 0){
         for(int i = 0; i <= ThreadPool.size(); i++){
             changeThread *myThread = ThreadPool.front();

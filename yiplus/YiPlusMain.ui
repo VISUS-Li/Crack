@@ -199,7 +199,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QTableWidget" name="Table_AllAccount">
+  <widget class="QTableView" name="Table_AllAccount">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -317,6 +317,32 @@
    </property>
    <property name="text">
     <string>打印日志</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Btn_EnableAccount">
+   <property name="geometry">
+    <rect>
+     <x>690</x>
+     <y>90</y>
+     <width>41</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>不启用</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Btn_DelAccount">
+   <property name="geometry">
+    <rect>
+     <x>650</x>
+     <y>90</y>
+     <width>41</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>删除</string>
    </property>
   </widget>
  </widget>
