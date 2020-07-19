@@ -253,7 +253,9 @@ void YiPlusMain::on_ckBox_useProxy_stateChanged(int arg1)
 
 void YiPlusMain::on_Btn_ImportAccount_clicked()
 {
+    Account newaccount("","","");
     QString filename = QFileDialog::getOpenFileName(this,"Open Files", ".", "text file(*.txt)");
+    QString importAccountPath = CommonUtils::Instance()->GetExePath("account.txt");
     QFile file(filename);
     if(! file.open(QIODevice::ReadOnly|QIODevice::Text)){
           LogHelper::Instance()->AppendLogList("导入账号，打开txt文件失败");
@@ -262,20 +264,23 @@ void YiPlusMain::on_Btn_ImportAccount_clicked()
     file.seek(0);
 
     QTextStream accountInfo(&file);
-    QString usrID, passWd;
+    QString usrID, passWd, store;
     while( !accountInfo.atEnd() ) {
         QString line=accountInfo.readLine();
         QStringList strlist=line.split(",");
-        usrID=strlist[0];
-        passWd=strlist[1];
-        qDebug() << "usrId: " << usrID << " passWd: " << passWd;
+        usrID = strlist[0];
+        passWd= strlist[1];
+        store = strlist[2];
+        qDebug() << "usrId: " << usrID << " passWd: " << passWd << "store: " << store ;
         int iRow = tableModel->rowCount();
         tableModel->setItem(iRow,0, new QStandardItem(usrID));
         tableModel->setItem(iRow,1, new QStandardItem(passWd));
-        tableModel->setItem(iRow,2, new QStandardItem(tr("启用")));
-        Account newAccount(usrID,passWd,"001");
-
+        tableModel->setItem(iRow,2, new QStandardItem(store));
+        newaccount.SetStore(store);
+        newaccount.SetPassWord(passWd);
+        newaccount.SetPhoneNumber(usrID);
     }
+
 
         file.close();
 }
