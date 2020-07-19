@@ -211,7 +211,9 @@ public:
     bool IsFilorDirExist(QString path);
     QString GetExePath(QString fileName = "");
     bool ImportAccount(QString filePath, QList<Account> *accountList);
+    bool UpdateAccountToFile(QList<Account> *accountList, QString filePath = "");
     bool InsertDefAccountDoc(Account account, QList<Account> *accountList);
+    QString ConvertStore(QString str, bool code = true);
     bool WriteReplayLog(JsonClass replayJson, QString path = "");//每个账号单独写一个文件
 
     bool ParseLoginJson(QString loginStr, JsonClass& ReplayJson);//登录返回的json
@@ -219,7 +221,7 @@ public:
     bool ParseGoodListsJson(QString goodsListStr, JsonClass& ReplayJson);//获取商品列表返回的json
     bool ParseGoodItemJson(QString goodItemStr, JsonClass& ReplayJson);//获取商品详情返回的json
     bool ParseChangeGoodJson(QString changeStr, JsonClass& ReplayJson);//兑换商品返回的json
-    bool ParseProxyStatus(QString proxyStr, JsonClass& ReplayJson);//获取代理服务器IP返回的TXT
+    bool ParseProxyStatus(QString proxyStr, JsonClass& ReplayJson, QString userID);//获取代理服务器IP返回的TXT
     void inline SetDefAccDocPath(QString path){
         defAccDocPath = path;
     }
@@ -268,7 +270,6 @@ private:
 };
 
 
-
 class LogHelper{
 public:
     LogHelper();
@@ -278,6 +279,8 @@ public:
         }
         return m_log;
     }
+
+
     inline void SetLogListModel(QStandardItemModel* model){
         logListModel = model;
     }
@@ -285,12 +288,13 @@ public:
         isPrintLog = flag;
     }
     bool AppendLogList(QString item, QString userID = "");
+    bool OpenAllLogsFile();
+    bool CloseAllLogsFile();
 private:
     static LogHelper* m_log;
+    QFile* logFile;
     QStandardItemModel *logListModel;
     bool isPrintLog;
-
-
 };
 
 

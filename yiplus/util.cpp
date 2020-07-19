@@ -92,10 +92,14 @@ bool CommonUtils::ImportAccount(QString filePath, QList<Account> *accountList){
             File.close();
             return false;
         }
-        Account newAccount(splitAccount[0],splitAccount[1],"001");
-        if(!AccountExist(*accountList,newAccount.GetPoneNumber())){
-            accountList->push_back(newAccount);
-            LogHelper::Instance()->AppendLogList(splitAccount[0]+"-"+splitAccount[1]);
+        if(splitAccount.count() == 3){
+            Account newAccount(splitAccount[0],splitAccount[1],splitAccount[2]);
+            if(!AccountExist(*accountList,newAccount.GetPoneNumber())){
+                accountList->push_back(newAccount);
+                LogHelper::Instance()->AppendLogList(splitAccount[0]+"-"+splitAccount[1]+"-"+splitAccount[2]);
+            }
+        }else{
+            LogHelper::Instance()->AppendLogList("初始化账户集失败，account.txt中格式不正确");
         }
     }
     if(File.isOpen())
@@ -107,8 +111,52 @@ bool CommonUtils::ImportAccount(QString filePath, QList<Account> *accountList){
     return true;
 }
 
+QString CommonUtils::ConvertStore(QString str, bool code){
+    if(code){
+        if(str == "001"){return "春熙店";}
+        if(str == "002"){return "双楠店";}
+        if(str == "003"){return "锦华店";}
+        if(str == "004"){return "建设路店";}
+        if(str == "005"){return "高新店";}
+        if(str == "006"){return "温江店";}
+        if(str == "007"){return "眉山店";}
+        if(str == "008"){return "绿地店";}
+        if(str == "009"){return "乐山店";}
+        if(str == "101"){return "华府大道店";}else{return "";}
+    }else{
+        if(str == "春熙店"){return "001";}
+        if(str == "双楠店"){return "002";}
+        if(str == "锦华店"){return "003";}
+        if(str == "建设路店"){return "004";}
+        if(str == "高新店"){return "005";}
+        if(str == "温江店"){return "006";}
+        if(str == "眉山店"){return "007";}
+        if(str == "绿地店"){return "008";}
+        if(str == "乐山店"){return "009";}
+        if(str == "华府大道店"){return "101";}else{return "";}
+    }
+}
+
+bool CommonUtils::UpdateAccountToFile(QList<Account> *accountList, QString filePath){
+    if(filePath == ""){
+        filePath = GetExePath("account.txt");
+    }
+    if(QFile::remove(filePath)){
+        QFile accountFile(filePath);
+        if(!accountFile.open(QIODevice::ReadWrite | QIODevice::Append)){
+            return false;
+        }
+        for(QList<Account>::iterator iter = accountList->begin(); iter != accountList->end(); iter++){
+            QString str = iter->GetPoneNumber()+","+iter->GetPassWord()+","+iter->GetStore()+"\n";
+            accountFile.write(str.toUtf8());//写入文件中
+        }
+        accountFile.close();
+    }
+    return false;
+}
+
 bool CommonUtils::InsertDefAccountDoc(Account account, QList<Account> *accountList){
-    QString writeStr = account.GetPoneNumber()+","+account.GetPassWord()+"\n";
+    QString writeStr = account.GetPoneNumber()+","+account.GetPassWord()+","+account.GetStore()+"\n";
     Account* existAccount = new Account("","","");
     if(!AccountExist(*accountList,account.GetPoneNumber(),existAccount)){
         delete existAccount;
@@ -137,7 +185,7 @@ bool CommonUtils::InsertDefAccountDoc(Account account, QList<Account> *accountLi
                     if(iter->GetPoneNumber() == account.GetPoneNumber()){
                         iter->SetPassWord(account.GetPassWord());
                     }
-                    QString str = iter->GetPoneNumber()+","+iter->GetPassWord()+"\n";
+                    QString str = iter->GetPoneNumber()+","+iter->GetPassWord()+","+iter->GetStore()+"\n";
                     accountFile.write(writeStr.toUtf8());//写入文件中
                 }
                 accountFile.close();
@@ -157,7 +205,7 @@ QJsonObject CommonUtils::GetJsonObject(QString JsonStr){
         QJsonDocument document = QJsonDocument::fromJson(JsonStr.toUtf8(),&parseJsonErr);
         if(!(parseJsonErr.error == QJsonParseError::NoError))
         {
-            LogHelper::Instance()->AppendLogList("解析Json失败:"+parseJsonErr.errorString());
+            //LogHelper::Instance()->AppendLogList("解析Json失败:"+parseJsonErr.errorString());
             return jsonObject;
         }
         jsonObject = document.object();
@@ -440,16 +488,16 @@ bool CommonUtils::ParseChangeGoodJson(QString changeStr, JsonClass& ReplayJson){
     }
 }
 
-bool CommonUtils::ParseProxyStatus(QString proxyStr, JsonClass& ReplayJson){
+bool CommonUtils::ParseProxyStatus(QString proxyStr, JsonClass& ReplayJson,QString userID){
     if(proxyStr == ""){
-        LogHelper::Instance()->AppendLogList("获取代理服务器失败");
+        LogHelper::Instance()->AppendLogList("获取代理服务器失败",userID);
         return false;
     }
     QStringList ip_port_list = proxyStr.split(":");
     if(ip_port_list.count() <= 1){
         QStringList error = proxyStr.split("!");
         if(error.count() <= 1 || error.count() > 4){
-            LogHelper::Instance()->AppendLogList("获取代理服务器失败");
+            LogHelper::Instance()->AppendLogList("获取代理服务器失败",userID);
             ReplayJson.proxyStatus.ProxyError = "解析代理服务器返回值错误";
             return false;
         }
@@ -541,17 +589,52 @@ bool CommonUtils::WriteReplayLog(JsonClass replayJson, QString path){
 LogHelper::LogHelper(){
     logListModel = nullptr;
     isPrintLog = false;
+    logFile = nullptr;
 }
-bool LogHelper::AppendLogList(QString item,QString userID){
-    if(!isPrintLog){
+
+bool LogHelper::OpenAllLogsFile(){
+   if(logFile){
+        if(logFile->isOpen()){
+            logFile->close();
+        }
+        delete logFile;
+        logFile = nullptr;
+   }
+
+    logFile = new QFile(CommonUtils::Instance()->GetExePath("AllLogs.txt"));
+    if(logFile->open(QIODevice::ReadWrite | QIODevice::Append)){
         return true;
     }
+    return false;
+}
+
+bool LogHelper::CloseAllLogsFile(){
+    if(logFile){
+        if(logFile->isOpen()){
+            logFile->close();
+        }
+        delete logFile;
+        logFile = nullptr;
+    }
+}
+
+bool LogHelper::AppendLogList(QString item,QString userID){
     if(logListModel == nullptr){
         return false;
     }
     QString time = QDateTime::currentDateTime().toString("yyyy-MM-dd-hh:mm:ss");
-    item = time + " " + userID + " " + item;
+    item = time + " --" + userID + "-- " + item;
+
     QStandardItem *stItem = new QStandardItem(item);
+    QString writeStr = item + "\n";
+    if(logFile && logFile->isOpen()){
+        logFile->write(writeStr.toUtf8());
+    }else{
+        OpenAllLogsFile();
+    }
+    if(!isPrintLog){
+        return true;
+    }
     logListModel->appendRow(stItem);
     return true;
 }

@@ -37,16 +37,34 @@ public:
     inline void setIsLoginTest(bool flag){
         isLogInTest = flag;
     }
+    inline QString getPhoneNumber(){
+        return userID;
+    }
+
+    inline void setEnable(bool flag){
+        accountEnable = flag;
+    }
+
+    inline bool isChangeSucc(){
+        return changeRet;
+    }
 
 private:
     bool isStop = false;
     QTableWidget *table;
     int currentRow;
     QString userID, memberID, passWord, token, changeList, detail, change, store;
-    QString recordid = "544", goodid = "617", eid = "999", isspike = "0", changeCount = "1";
+    //指甲钳
+    //QString recordid = "544", goodid = "617", eid = "999", isspike = "0", changeCount = "1";
+    //茅台
+    QString recordid = "218", goodid = "467", eid = "544", isspike = "2", changeCount = "2";
     QString proxyIp = "";
     int proxyPort = 0;
     bool useProxy = false;
+    bool accountEnable = true;
+    bool goodCountLack = false;//商品数量不足
+    long long preGetProxyTime = 0;
+    long long ProxyTimeOut = 299900;//代理失效时间，单位毫秒
     QMutex mutex;
 
     JsonClass jsonReplay;
@@ -65,6 +83,7 @@ private:
     bool changeGoods();
 
     bool getProxyIp(QString &proxyIp, int &proxyPort);
+    bool tryGetProxy();//尝试获取代理IP和端口
 
 private slots:
     bool replyFinished(QByteArray arry);

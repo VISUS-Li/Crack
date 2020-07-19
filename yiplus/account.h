@@ -34,11 +34,18 @@ public:
     inline bool isEnable(){
         return Enable;
     }
+    inline QString GetStatus(){
+        return Status;
+    }
+    inline void SetStatus(QString str){
+        Status = str;
+    }
 private:
     QString m_QStrPhoneNumber;
     QString m_QStrPassWord;
     QString m_QStrStore;//要兑换的店铺
     bool Enable;
+    QString Status;//账号兑换状态
 };
 
 #endif // ACCOUNT_H
