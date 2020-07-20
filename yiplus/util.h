@@ -221,12 +221,15 @@ public:
     bool ParseGoodListsJson(QString goodsListStr, JsonClass& ReplayJson);//获取商品列表返回的json
     bool ParseGoodItemJson(QString goodItemStr, JsonClass& ReplayJson);//获取商品详情返回的json
     bool ParseChangeGoodJson(QString changeStr, JsonClass& ReplayJson);//兑换商品返回的json
-    bool ParseProxyStatus(QString proxyStr, JsonClass& ReplayJson, QString userID);//获取代理服务器IP返回的TXT
+    bool ParseProxyStatus(QString proxyStr, JsonClass& ReplayJson, QString userID = "");//获取代理服务器IP返回的TXT
     void inline SetDefAccDocPath(QString path){
         defAccDocPath = path;
     }
+
+    bool TryGetProxy(QString proxyIp, int proxyPort);
 private:
     QJsonObject GetJsonObject(QString JsonStr);
+    bool GetProxy(QString proxyIp,int proxyPort);
     static CommonUtils* m_Comm;
 
     //QFile *File;

@@ -5,6 +5,9 @@
 #include <QCoreApplication>
 #include <QList>
 #include <QTextCodec>
+#include <QNetworkAccessManager>
+#include <QTimer>
+#include <QNetworkReply>
 
 LogHelper *LogHelper::m_log = NULL;
 CommonUtils *CommonUtils::m_Comm = NULL;
@@ -68,6 +71,32 @@ bool CommonUtils::AccountExist(QList<Account> account,QString userID, Account *r
     }
     return false;
 }
+bool CommonUtils::GetProxy(QString proxyIp,int proxyPort,){
+    QString reqUrl = "http://http.9vps.com/getip.asp?username=visus&pwd=e35346ede433742757d2ba48550edfc8&geshi=1&fenge=3&fengefu=&getnum=1";
+
+    QEventLoop eventLoop;
+    QNetworkAccessManager manager;
+    QObject::connect(&manager, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
+
+    QUrl url(reqUrl);
+    QNetworkRequest req(url);
+    QTimer::singleShot(1000,&eventLoop,SLOT(quit()));
+    QNetworkReply *reply = manager.get(req);
+    eventLoop.exec();
+    QByteArray arry = reply->readAll();
+    if(reply){
+        delete reply;
+        reply = NULL;
+    }
+
+    //解析返回的IP
+    JsonClass jsonReplay;
+    ParseProxyStatus(arry,jsonReplay);
+    proxyIp = jsonReplay.proxyStatus.ProxyIp;
+    proxyPort = jsonReplay.proxyStatus.ProxyPort;
+    preGetProxyTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
+}
+
 bool CommonUtils::ImportAccount(QString filePath, QList<Account> *accountList){
     QFile File(filePath);
     if(!File.open(QIODevice::ReadOnly | QIODevice::Text)){
@@ -93,10 +122,10 @@ bool CommonUtils::ImportAccount(QString filePath, QList<Account> *accountList){
             return false;
         }
         if(splitAccount.count() == 3){
-            Account newAccount(splitAccount[0],splitAccount[1],splitAccount[2]);
+            Account newAccount(splitAccount[0],splitAccount[1],splitAccount[2].toUtf8());
             if(!AccountExist(*accountList,newAccount.GetPoneNumber())){
                 accountList->push_back(newAccount);
-                LogHelper::Instance()->AppendLogList(splitAccount[0]+"-"+splitAccount[1]+"-"+splitAccount[2]);
+                LogHelper::Instance()->AppendLogList(splitAccount[0]+"-"+splitAccount[1]+"-"+splitAccount[2].toUtf8());
             }
         }else{
             LogHelper::Instance()->AppendLogList("初始化账户集失败，account.txt中格式不正确");

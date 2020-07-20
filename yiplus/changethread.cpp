@@ -30,18 +30,18 @@ void  changeThread::run()
     int cnt =0;
     int countNeedProxy = 0;//失败这么多次后重新尝试获取代理
     if(isLogInTest){
-            signIN();
+            signInAndThen();
             CommonUtils::Instance()->WriteReplayLog(jsonReplay,userID+".txt");
             if(jsonReplay.loginJson.ResFlag == "true"){
                 LogHelper::Instance()->AppendLogList("账号:"+userID+",密码:"+passWord+",登录测试成功!,token:"+jsonReplay.loginJson.Token);
-                getHomePage();
+                //getHomePage();
+                changeGoods();
             }else{
                 LogHelper::Instance()->AppendLogList("账号:"+userID+",密码:"+passWord+",登录测试失败!,token:"+jsonReplay.loginJson.Token);
             }
             isLogInTest = false;
             return;
     }else{
-        signIN();
         while (1) {
 
             {
@@ -52,9 +52,21 @@ void  changeThread::run()
                     tryGetProxy();
                 }
             }
-
+            if((!loginRet && !changeRet) || token == ""){
+                cnt = 0;
+                signInAndThen();
+            }
+            if(loginRet && changeList == ""){
+                getHomePage();
+            }
+            if(loginRet && detail == ""){
+                getGoodsList();
+            }
+            if(loginRet && change == ""){
+                getGoodsInfo();
+            }
             if(loginRet && !changeRet) {//如果账号登录了，并且没有兑换成功，开始兑换流程
-                    changeRet = getHomePage();
+                    changeRet = changeGoods();
                     cnt++;
             }
             if(changeList == "" && detail == "" && change == ""){
@@ -66,10 +78,6 @@ void  changeThread::run()
             }
             mutex.unlock();
 
-            if((!loginRet && !changeRet)){
-                cnt = 0;
-                signIN();
-            }
             //如果超过20次失败，重新获取代理
             if(countNeedProxy > 20){
                 countNeedProxy = 0;
@@ -124,7 +132,7 @@ bool changeThread::tryGetProxy(){
         usleep(1200*1000);
         getProxyIp(proxyIp,proxyPort);
         cnt++;
-        if(cnt >= 50) {
+        if(cnt >= 10) {
              LogHelper::Instance()->AppendLogList("获取代理IP失败！",userID);
             return false;
         }
@@ -281,17 +289,25 @@ bool changeThread::changeGoods()
         return replyGoodChange(arry);
 }
 
-
+//只有登陆获取token的操作，没有获取后续参数的操作
 bool changeThread::signIN()
 {
     LogHelper::Instance()->AppendLogList("开始登录",userID);
+    QString headerStr = "phoneNumber=" + userID + "&password=" + passWord;
+    QByteArray replyArry = Post(logInURL,headerStr);
+    return replyFinished(replyArry,false);
+}
+
+bool changeThread::signInAndThen()
+{
+    LogHelper::Instance()->AppendLogList("开始登录andThen",userID);
     QString headerStr = "phoneNumber=" + userID + "&password=" + passWord;
     QByteArray replyArry = Post(logInURL,headerStr);
     return replyFinished(replyArry);
 }
 
 
-bool changeThread::replyFinished(QByteArray arry)
+bool changeThread::replyFinished(QByteArray arry,bool andThen)
 {
 
     qDebug() << "登录请求返回";
@@ -309,6 +325,9 @@ bool changeThread::replyFinished(QByteArray arry)
         requestRet = true;
         isExpired = false;
         loginRet = true;
+        if(andThen){
+            getHomePage();
+        }
         return true;
     }else{
         requestRet = false;
@@ -414,7 +433,7 @@ bool changeThread::replyGoodInfo(QByteArray arry)
 
     if(jsonReplay.moutaiJson.ResFlag == "true"){
         requestRet = true;
-        return changeGoods();
+        //return changeGoods();
     }else{
         LogHelper::Instance()->AppendLogList("请求商品详细信息失败，message："+jsonReplay.moutaiJson.Message,userID);
         requestRet = false;

@@ -40,7 +40,7 @@ void YiPlusMain::TimerFunc(){
 
     //判断当前是否是要执行的时间
     QTime nowTime = QTime::currentTime();
-    if(nowTime.hour() == 23 && nowTime.minute() == 56 && nowTime.second() == 00){
+    if(nowTime.hour() == 23 && nowTime.minute() == 57 && nowTime.second() == 30){
         //开始自动执行
         StartAllThread();
     }
@@ -76,7 +76,7 @@ void YiPlusMain::StartAllThread(){
                 myThread->start();
 
                 QEventLoop eventloop;
-                QTimer::singleShot(400, &eventloop, SLOT(quit()));
+                QTimer::singleShot(1000, &eventloop, SLOT(quit()));
                 eventloop.exec();
             }
         }
@@ -198,7 +198,7 @@ void YiPlusMain::on_Btn_AddAccount_clicked()
         QMessageBox::information(NULL,"添加用户","用户名或密码不能为空");
         return;
     }
-    Account newAccount(userName,passWord,"001");
+    Account newAccount(userName,passWord,"春熙店");
     CommonUtils::Instance()->InsertDefAccountDoc(newAccount,&Accounts);
     ShowAccountInTable();
 }

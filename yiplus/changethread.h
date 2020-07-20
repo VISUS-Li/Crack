@@ -64,7 +64,7 @@ private:
     bool accountEnable = true;
     bool goodCountLack = false;//商品数量不足
     long long preGetProxyTime = 0;
-    long long ProxyTimeOut = 299900;//代理失效时间，单位毫秒
+    long long ProxyTimeOut = 300000;//代理失效时间，单位毫秒
     QMutex mutex;
 
     JsonClass jsonReplay;
@@ -76,7 +76,8 @@ private:
     QByteArray Get(QString uri);
     QByteArray Get_IPLocationTest();
 
-    bool signIN();
+    bool signIN();//只有登陆流程
+    bool signInAndThen();//从登陆到获取changelist detail change整个流程
     bool getHomePage();
     bool getGoodsList();
     bool getGoodsInfo();
@@ -86,7 +87,7 @@ private:
     bool tryGetProxy();//尝试获取代理IP和端口
 
 private slots:
-    bool replyFinished(QByteArray arry);
+    bool replyFinished(QByteArray arry,bool andThen = true);
     bool replyHomePage(QByteArray arry);
     bool replyGoodsList(QByteArray arry);
     bool replyGoodInfo(QByteArray arry);
