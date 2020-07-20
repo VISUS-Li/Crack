@@ -264,24 +264,16 @@ void YiPlusMain::on_Btn_ImportAccount_clicked()
     file.seek(0);
 
     QTextStream accountInfo(&file);
-    QString usrID, passWd, store;
     while( !accountInfo.atEnd() ) {
         QString line=accountInfo.readLine();
         QStringList strlist=line.split(",");
-        usrID = strlist[0];
-        passWd= strlist[1];
-        store = strlist[2];
-        qDebug() << "usrId: " << usrID << " passWd: " << passWd << "store: " << store ;
-        int iRow = tableModel->rowCount();
-        tableModel->setItem(iRow,0, new QStandardItem(usrID));
-        tableModel->setItem(iRow,1, new QStandardItem(passWd));
-        tableModel->setItem(iRow,2, new QStandardItem(store));
-        newaccount.SetStore(store);
-        newaccount.SetPassWord(passWd);
-        newaccount.SetPhoneNumber(usrID);
+        qDebug() << "usrId: " << strlist[0] << " passWd: " << strlist[1] << "store: " << strlist[2].toUtf8() ;
+        newaccount.SetStore(strlist[2].toUtf8());
+        newaccount.SetPassWord(strlist[1]);
+        newaccount.SetPhoneNumber(strlist[0]);
+
+        CommonUtils::Instance()->InsertDefAccountDoc(newaccount, &Accounts);
     }
-
-
         file.close();
 }
 

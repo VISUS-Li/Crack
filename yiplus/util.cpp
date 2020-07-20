@@ -71,7 +71,7 @@ bool CommonUtils::AccountExist(QList<Account> account,QString userID, Account *r
     }
     return false;
 }
-bool CommonUtils::GetProxy(QString proxyIp,int proxyPort,){
+bool CommonUtils::GetProxy(QString proxyIp,int proxyPort){
     QString reqUrl = "http://http.9vps.com/getip.asp?username=visus&pwd=e35346ede433742757d2ba48550edfc8&geshi=1&fenge=3&fengefu=&getnum=1";
 
     QEventLoop eventLoop;
@@ -94,7 +94,8 @@ bool CommonUtils::GetProxy(QString proxyIp,int proxyPort,){
     ParseProxyStatus(arry,jsonReplay);
     proxyIp = jsonReplay.proxyStatus.ProxyIp;
     proxyPort = jsonReplay.proxyStatus.ProxyPort;
-    preGetProxyTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
+    //preGetProxyTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
+    return true;
 }
 
 bool CommonUtils::ImportAccount(QString filePath, QList<Account> *accountList){

@@ -24,6 +24,7 @@ void changeThread::setStopValue(bool value){
 
 void  changeThread::run()
 {
+
     jsonReplay.Reset();
     tryGetProxy();
     //Get_IPLocationTest();
@@ -66,8 +67,14 @@ void  changeThread::run()
                 getGoodsInfo();
             }
             if(loginRet && !changeRet) {//如果账号登录了，并且没有兑换成功，开始兑换流程
+                //判断当前是否是要执行的时间
+                QTime nowTime = QTime::currentTime();
+                if((nowTime.hour() >= 23 && nowTime.minute() >= 59 && nowTime.second() >= 30)\
+                    || (nowTime.hour() == 00)){
                     changeRet = changeGoods();
                     cnt++;
+                }
+
             }
             if(changeList == "" && detail == "" && change == ""){
                 countNeedProxy++;
@@ -121,6 +128,7 @@ bool changeThread::getProxyIp(QString &proxyIp, int &proxyPort){
     proxyIp = jsonReplay.proxyStatus.ProxyIp;
     proxyPort = jsonReplay.proxyStatus.ProxyPort;
     preGetProxyTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
+    return true;
 }
 
 bool changeThread::tryGetProxy(){
@@ -149,7 +157,7 @@ QByteArray changeThread::Post(QString uri, QString header)
         QNetworkProxy proxy;
         proxy.setType(QNetworkProxy::HttpProxy);      
         proxy.setHostName(proxyIp);
-        proxy.setPort(proxyPort);
+        proxy.setPort(quint16(proxyPort));
         manager.setProxy(proxy);
     }
 
@@ -180,7 +188,7 @@ QByteArray changeThread::Post_FormData(QString uri, QString form){
         QNetworkProxy proxy;
         proxy.setType(QNetworkProxy::HttpProxy);
         proxy.setHostName(proxyIp);
-        proxy.setPort(proxyPort);
+        proxy.setPort(quint16(proxyPort));
         manager.setProxy(proxy);
     }
 
@@ -212,7 +220,7 @@ QByteArray changeThread::Get_IPLocationTest(){
     QNetworkProxy proxy;
     proxy.setType(QNetworkProxy::HttpProxy);
     proxy.setHostName(proxyIp);
-    proxy.setPort(proxyPort);
+    proxy.setPort(quint16(proxyPort));
     mgr.setProxy(proxy);
 
 
@@ -256,7 +264,7 @@ QByteArray changeThread::Get(QString uri)
         QNetworkProxy proxy;
         proxy.setType(QNetworkProxy::HttpProxy);
         proxy.setHostName(proxyIp);
-        proxy.setPort(proxyPort);
+        proxy.setPort(quint16(proxyPort));
         mgr.setProxy(proxy);
     }
 
