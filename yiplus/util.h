@@ -12,6 +12,7 @@
 #include <QJsonValue>
 
 #include "account.h"
+#include "common.h"
 namespace Utils {
     class CommonUtils;
     class ExcelHelper;
@@ -226,10 +227,10 @@ public:
         defAccDocPath = path;
     }
 
-    bool TryGetProxy(QString proxyIp, int proxyPort);
+    bool TryGetProxy(QList<ProxyData>& proxyData, qint64 preGetProxyTime,int getNum = 1);
 private:
     QJsonObject GetJsonObject(QString JsonStr);
-    bool GetProxy(QString proxyIp,int proxyPort);
+    bool GetProxy(QList<ProxyData>& proxyData, qint64& preGetProxyTime, int getNum = 1);
     static CommonUtils* m_Comm;
 
     //QFile *File;

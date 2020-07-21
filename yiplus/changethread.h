@@ -49,6 +49,15 @@ public:
         return changeRet;
     }
 
+    inline void setProxyIp(QString Ip){
+        proxyIp = Ip;
+    }
+    inline void setProxyPort(int port){
+        proxyPort = port;
+    }
+	inline void setPreProxyTime(long long preTime){
+		preGetProxyTime = preTime;
+	}
 private:
     bool isStop = false;
     QTableWidget *table;

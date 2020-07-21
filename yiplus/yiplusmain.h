@@ -39,7 +39,9 @@ private:
     QTimer *timer;
     QList<changeThread*> ThreadPool;//用于统一销毁线程
     Account *selectedAccount;//当前选中的账号
-
+    qint64 preProxyTime;//上次获取代理的时间
+    QList<ProxyData> proxyData;//获取到的代理列表
+	long long ProxyTimeOut;//代理使用的超时时间
 signals:
 
 private slots:

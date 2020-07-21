@@ -8,6 +8,7 @@
 
 YiPlusMain::YiPlusMain(QWidget *parent) : QWidget(parent)
 {
+	ProxyTimeOut = 300000;//五分钟，单位毫秒
     ui = new Ui::YiPlusMain;
     ui->setupUi(this);
     {
@@ -48,17 +49,35 @@ void YiPlusMain::TimerFunc(){
         //停止自动执行
         StopAllThread();
     }
+
+    //代理超时，获取代理
+    long long nowProxyTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
+    if(nowProxyTime - preProxyTime >= ProxyTimeOut){
+        CommonUtils::Instance()->TryGetProxy(proxyData,preProxyTime,Accounts.count());
+		for(QList<changeThread*>::iterator iter = ThreadPool.begin(); iter != ThreadPool.end(); iter++){
+			(*iter)->setProxyIp(proxyData.proxyIp);
+			(*iter)->setProxyPort(proxyData.proxyPort);
+			(*iter)->setPreProxyTime(preProxyTime);
+		}
+    }
     ShowAccountInTable();
 
 }
 void YiPlusMain::StartAllThread(){
-    QString accPath = CommonUtils::Instance()->GetExePath("account.txt");
-    CommonUtils::Instance()->ImportAccount(accPath,&Accounts);
-    if(Accounts.size() <= 0 || CommonUtils::Instance()->GetAccEnableCounts(Accounts) <= 0){
+    //QString accPath = CommonUtils::Instance()->GetExePath("account.txt");
+    //CommonUtils::Instance()->ImportAccount(accPath,&Accounts);
+    if(Accounts.count() <= 0 || CommonUtils::Instance()->GetAccEnableCounts(Accounts) <= 0){
         LogHelper::Instance()->AppendLogList("可用账户为空");
     }
+    proxyData.clear();
+    preProxyTime = 0;
+    int tryCount = 0;
+    while(!CommonUtils::Instance()->TryGetProxy(proxyData,preProxyTime,Accounts.count())){
+        tryCount++;
+        LogHelper::Instance()->AppendLogList("获取代理列表失败,尝试次数:"+QString("%1").arg(tryCount));
+    }
     if(ThreadPool.size() <= 0 ){
-        for(int i = 0; i < Accounts.size(); i++){
+        for(int i = 0; i < Accounts.count(); i++){
             if(Accounts[i].GetPoneNumber() == ""){
                 LogHelper::Instance()->AppendLogList("账户电话号码为空");
             }else if(Accounts[i].GetPassWord() == ""){
@@ -71,6 +90,10 @@ void YiPlusMain::StartAllThread(){
                 changeThread *myThread = new changeThread(memberInfo);
                 bool isChecked = ui->ckBox_useProxy->isChecked();
                 myThread->setUseProxy(isChecked);
+                if(proxyData[i].proxyIp != "" || proxyData[i].proxyPort != 0){
+                    myThread->setProxyIp(proxyData[i].proxyIp);
+                    myThread->setProxyPort(proxyData[i].proxyPort);
+                }
                 ThreadPool.push_back(myThread);
 
                 myThread->start();

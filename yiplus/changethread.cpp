@@ -69,7 +69,7 @@ void  changeThread::run()
             if(loginRet && !changeRet) {//如果账号登录了，并且没有兑换成功，开始兑换流程
                 //判断当前是否是要执行的时间
                 QTime nowTime = QTime::currentTime();
-                if((nowTime.hour() >= 23 && nowTime.minute() >= 59 && nowTime.second() >= 30)\
+                if((nowTime.hour() >= 23 && nowTime.minute() >= 58 && nowTime.second() >= 30)\
                     || (nowTime.hour() == 00)){
                     changeRet = changeGoods();
                     cnt++;

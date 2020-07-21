@@ -16,8 +16,23 @@ typedef struct _memberInfo_t {
     QString passWord;
     QString token;
     QString store;//店铺ID
-
 }memberInfo_t;
+
+typedef struct stu_ProxyData{
+	QString proxyIp;
+	int proxyPort;
+	stu_ProxyData(){
+		proxyIp = "";
+		proxyPort = 0;
+	}
+	stu_ProxyData& operator = (stu_ProxyData const& other){
+		if(this == &other)return *this;
+		proxyIp = other.proxyIp;
+		proxyPort = other.proxyPort;
+		return *this;
+	}
+}ProxyData;
+
 #define SN_Chunxi       "春熙店"
 #define SN_Shuangnan    "双楠店"
 #define SN_Jinhua       "锦华店"

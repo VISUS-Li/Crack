@@ -71,8 +71,8 @@ bool CommonUtils::AccountExist(QList<Account> account,QString userID, Account *r
     }
     return false;
 }
-bool CommonUtils::GetProxy(QString proxyIp,int proxyPort){
-    QString reqUrl = "http://http.9vps.com/getip.asp?username=visus&pwd=e35346ede433742757d2ba48550edfc8&geshi=1&fenge=3&fengefu=&getnum=1";
+bool CommonUtils::GetProxy(QList<ProxyData>& proxyData, qint64& preGetProxyTime, int getNum){
+    QString reqUrl = "http://http.9vps.com/getip.asp?username=visus&pwd=e35346ede433742757d2ba48550edfc8&geshi=1&fenge=3&fengefu=&getnum="+getNum;
 
     QEventLoop eventLoop;
     QNetworkAccessManager manager;
@@ -88,13 +88,41 @@ bool CommonUtils::GetProxy(QString proxyIp,int proxyPort){
         delete reply;
         reply = NULL;
     }
+    if (arry == "") {
+        return false;
+    }
+    QString allStr(arry);
+    QStringList allProxyList = allStr.split("\n",QString::SkipEmptyParts);
+    bool isFail = true;
+    for(int i = 0; i < allProxyList.count(); i++){
+        JsonClass jsonReplay;
+        ParseProxyStatus(allProxyList[i],jsonReplay);
+        ProxyData tmpProxy;
+        tmpProxy.proxyIp = jsonReplay.proxyStatus.ProxyIp;
+        tmpProxy.proxyPort = jsonReplay.proxyStatus.ProxyPort;
+        if(tmpProxy.proxyIp == "" || tmpProxy.proxyPort == 0){
+            isFail = false;
+        }
+        proxyData.push_back(tmpProxy);
+    }
+    preGetProxyTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
+    return isFail;
+}
 
-    //解析返回的IP
-    JsonClass jsonReplay;
-    ParseProxyStatus(arry,jsonReplay);
-    proxyIp = jsonReplay.proxyStatus.ProxyIp;
-    proxyPort = jsonReplay.proxyStatus.ProxyPort;
-    //preGetProxyTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
+bool CommonUtils::TryGetProxy(QList<ProxyData>& proxyData, qint64 preGetProxyTime,int getNum) {
+    int cnt = 0;
+    proxyData.clear();
+    preGetProxyTime = 0;
+    while (!GetProxy(proxyData,preGetProxyTime,getNum)) {
+        cnt++;
+        if (cnt >= 10) {
+            LogHelper::Instance()->AppendLogList("获取代理IP失败！","主线程");
+            return false;
+        }
+        QEventLoop loop;
+        QTimer::singleShot(1000,&loop,SLOT(quit()));
+        loop.exec();
+    }
     return true;
 }
 
