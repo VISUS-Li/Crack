@@ -26,7 +26,7 @@ void  changeThread::run()
 {
 
     jsonReplay.Reset();
-    tryGetProxy();
+    //tryGetProxy();
     //Get_IPLocationTest();
     int cnt =0;
     int countNeedProxy = 0;//失败这么多次后重新尝试获取代理
@@ -69,18 +69,23 @@ void  changeThread::run()
             if(loginRet && !changeRet) {//如果账号登录了，并且没有兑换成功，开始兑换流程
                 //判断当前是否是要执行的时间
                 QTime nowTime = QTime::currentTime();
-                if((nowTime.hour() >= 23 && nowTime.minute() >= 58 && nowTime.second() >= 30)\
+                if((nowTime.hour() >= 23 && nowTime.minute() >= 58 && nowTime.second() >= 00)\
                     || (nowTime.hour() == 00)){
+                    isStartChange = true;
                     changeRet = changeGoods();
                     cnt++;
                 }
 
             }
-            if(changeList == "" && detail == "" && change == ""){
+            if((changeList == "" && detail == "" && change == "") || (jsonReplay.goodChangedJson.Message == "" && isStartChange)){
                 countNeedProxy++;
             }
             mutex.lock();
             if(isStop){
+                changeRet = false;
+                changeList = "";
+                detail = "";
+                change = "";
                 break;
             }
             mutex.unlock();
@@ -92,12 +97,10 @@ void  changeThread::run()
                 LogHelper::Instance()->AppendLogList("尝试重新获取代理IP",userID);
             }
 
-            if(!changeRet){
-                if(useProxy && (proxyIp != "" && proxyPort != 0)){
-                    jsonReplay.proxyStatus.Enable = true;
-                }
-                CommonUtils::Instance()->WriteReplayLog(jsonReplay,userID+".txt");
+            if(useProxy && (proxyIp != "" && proxyPort != 0)){
+                jsonReplay.proxyStatus.Enable = true;
             }
+            CommonUtils::Instance()->WriteReplayLog(jsonReplay,userID+".txt");
             msleep(200);
         }
     }
@@ -127,24 +130,27 @@ bool changeThread::getProxyIp(QString &proxyIp, int &proxyPort){
     CommonUtils::Instance()->ParseProxyStatus(arry,jsonReplay,userID);
     proxyIp = jsonReplay.proxyStatus.ProxyIp;
     proxyPort = jsonReplay.proxyStatus.ProxyPort;
-    preGetProxyTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
-    return true;
+    if(proxyIp != "" && proxyPort != 0 && jsonReplay.proxyStatus.ProxyError == ""){
+        preGetProxyTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
+        return true;
+    }
+    return false;
 }
 
 bool changeThread::tryGetProxy(){
     int cnt=0;
     proxyIp = "";
     proxyPort = 0;
-    getProxyIp(proxyIp,proxyPort);
-    while( proxyIp.isEmpty() || !proxyPort ) {
+
+    while( !getProxyIp(proxyIp,proxyPort)) {
         usleep(1200*1000);
-        getProxyIp(proxyIp,proxyPort);
         cnt++;
         if(cnt >= 10) {
              LogHelper::Instance()->AppendLogList("获取代理IP失败！",userID);
             return false;
         }
     }
+    LogHelper::Instance()->AppendLogList("尝试获取IP成功:IP:"+proxyIp+",Port:"+QString::number(proxyPort),userID);
     return true;
 
 }

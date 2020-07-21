@@ -227,7 +227,7 @@ public:
         defAccDocPath = path;
     }
 
-    bool TryGetProxy(QList<ProxyData>& proxyData, qint64 preGetProxyTime,int getNum = 1);
+    bool TryGetProxy(QList<ProxyData>& proxyData, qint64 &preGetProxyTime,int getNum = 1);
 private:
     QJsonObject GetJsonObject(QString JsonStr);
     bool GetProxy(QList<ProxyData>& proxyData, qint64& preGetProxyTime, int getNum = 1);

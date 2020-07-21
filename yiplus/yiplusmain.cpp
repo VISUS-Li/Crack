@@ -41,23 +41,28 @@ void YiPlusMain::TimerFunc(){
 
     //判断当前是否是要执行的时间
     QTime nowTime = QTime::currentTime();
-    if(nowTime.hour() == 23 && nowTime.minute() == 57 && nowTime.second() == 30){
+    if(nowTime.hour() == 23 && nowTime.minute() == 50 && nowTime.second() == 30){
         //开始自动执行
         StartAllThread();
     }
-    if(nowTime.hour() == 00 && nowTime.minute() == 20){
+    if(nowTime.hour() == 00 && nowTime.minute() == 10){
         //停止自动执行
         StopAllThread();
     }
 
     //代理超时，获取代理
     long long nowProxyTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
-    if(nowProxyTime - preProxyTime >= ProxyTimeOut){
+    if((nowProxyTime - preProxyTime >= ProxyTimeOut)&&isStart){
+        LogHelper::Instance()->AppendLogList("代理使用超时，重新获取","主线程");
+        proxyData.clear();
         CommonUtils::Instance()->TryGetProxy(proxyData,preProxyTime,Accounts.count());
+        int cnt=0;
 		for(QList<changeThread*>::iterator iter = ThreadPool.begin(); iter != ThreadPool.end(); iter++){
-			(*iter)->setProxyIp(proxyData.proxyIp);
-			(*iter)->setProxyPort(proxyData.proxyPort);
+            (*iter)->setProxyIp(proxyData[cnt].proxyIp);
+            (*iter)->setProxyPort(proxyData[cnt].proxyPort);
 			(*iter)->setPreProxyTime(preProxyTime);
+            LogHelper::Instance()->AppendLogList("ID:"+QString::number(cnt+1)+",IP:"+proxyData[cnt].proxyIp+",Port:"+QString::number(proxyData[cnt].proxyPort),"主线程Timer");
+            cnt++;
 		}
     }
     ShowAccountInTable();
@@ -76,6 +81,7 @@ void YiPlusMain::StartAllThread(){
         tryCount++;
         LogHelper::Instance()->AppendLogList("获取代理列表失败,尝试次数:"+QString("%1").arg(tryCount));
     }
+
     if(ThreadPool.size() <= 0 ){
         for(int i = 0; i < Accounts.count(); i++){
             if(Accounts[i].GetPoneNumber() == ""){
@@ -91,13 +97,15 @@ void YiPlusMain::StartAllThread(){
                 bool isChecked = ui->ckBox_useProxy->isChecked();
                 myThread->setUseProxy(isChecked);
                 if(proxyData[i].proxyIp != "" || proxyData[i].proxyPort != 0){
+                    LogHelper::Instance()->AppendLogList("ID:"+QString::number(i+1)+",IP:"+proxyData[i].proxyIp+",Port:"+QString::number(proxyData[i].proxyPort),"主线程Start");
                     myThread->setProxyIp(proxyData[i].proxyIp);
                     myThread->setProxyPort(proxyData[i].proxyPort);
+                    myThread->setPreProxyTime(preProxyTime);
                 }
                 ThreadPool.push_back(myThread);
 
                 myThread->start();
-
+                isStart = true;
                 QEventLoop eventloop;
                 QTimer::singleShot(1000, &eventloop, SLOT(quit()));
                 eventloop.exec();
@@ -284,20 +292,35 @@ void YiPlusMain::on_Btn_ImportAccount_clicked()
           LogHelper::Instance()->AppendLogList("导入账号，打开txt文件失败");
           return;
     }
-    file.seek(0);
-
-    QTextStream accountInfo(&file);
-    while( !accountInfo.atEnd() ) {
-        QString line=accountInfo.readLine();
-        QStringList strlist=line.split(",");
-        qDebug() << "usrId: " << strlist[0] << " passWd: " << strlist[1] << "store: " << strlist[2].toUtf8() ;
-        newaccount.SetStore(strlist[2].toUtf8());
-        newaccount.SetPassWord(strlist[1]);
-        newaccount.SetPhoneNumber(strlist[0]);
-
-        CommonUtils::Instance()->InsertDefAccountDoc(newaccount, &Accounts);
-    }
+    QByteArray allTxt = file.readAll();
+    if(allTxt == ""){
         file.close();
+        return ;
+    }
+    QString allStr(allTxt);
+    QStringList allAccountList = allStr.split("\n",QString::SkipEmptyParts);
+    if(allAccountList.count() <= 0){
+        file.close();
+        return ;
+    }
+
+    for(int i = 0; i < allAccountList.count(); i++){
+        QString accountStr = allAccountList[i];
+        QStringList splitAccount = accountStr.split(",",QString::SkipEmptyParts);
+        if(splitAccount.count() <= 0){
+            file.close();
+            return ;
+        }
+        if(splitAccount.count() == 3){
+            Account newAccount(splitAccount[0],splitAccount[1],splitAccount[2].toUtf8());
+            CommonUtils::Instance()->InsertDefAccountDoc(newAccount, &Accounts);
+
+        }
+        if(file.isOpen())
+            file.close();
+
+    }
+
 }
 
 

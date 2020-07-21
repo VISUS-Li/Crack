@@ -72,8 +72,8 @@ bool CommonUtils::AccountExist(QList<Account> account,QString userID, Account *r
     return false;
 }
 bool CommonUtils::GetProxy(QList<ProxyData>& proxyData, qint64& preGetProxyTime, int getNum){
-    QString reqUrl = "http://http.9vps.com/getip.asp?username=visus&pwd=e35346ede433742757d2ba48550edfc8&geshi=1&fenge=3&fengefu=&getnum="+getNum;
-
+    QString reqUrl = QString("http://http.9vps.com/getip.asp?username=visus&pwd=e35346ede433742757d2ba48550edfc8&geshi=1&fenge=3&fengefu=&getnum=%1").arg(getNum);
+    qDebug()<< "GetProxyUrl:"<<reqUrl;
     QEventLoop eventLoop;
     QNetworkAccessManager manager;
     QObject::connect(&manager, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
@@ -93,23 +93,25 @@ bool CommonUtils::GetProxy(QList<ProxyData>& proxyData, qint64& preGetProxyTime,
     }
     QString allStr(arry);
     QStringList allProxyList = allStr.split("\n",QString::SkipEmptyParts);
-    bool isFail = true;
+    bool isFail = false;
     for(int i = 0; i < allProxyList.count(); i++){
         JsonClass jsonReplay;
         ParseProxyStatus(allProxyList[i],jsonReplay);
         ProxyData tmpProxy;
         tmpProxy.proxyIp = jsonReplay.proxyStatus.ProxyIp;
         tmpProxy.proxyPort = jsonReplay.proxyStatus.ProxyPort;
-        if(tmpProxy.proxyIp == "" || tmpProxy.proxyPort == 0){
-            isFail = false;
+        if(tmpProxy.proxyIp == "" || tmpProxy.proxyPort == 0 || jsonReplay.proxyStatus.ProxyError != ""){
+            isFail = true;
         }
         proxyData.push_back(tmpProxy);
     }
-    preGetProxyTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
-    return isFail;
+    if(!isFail){
+        preGetProxyTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
+    }
+    return !isFail;
 }
 
-bool CommonUtils::TryGetProxy(QList<ProxyData>& proxyData, qint64 preGetProxyTime,int getNum) {
+bool CommonUtils::TryGetProxy(QList<ProxyData>& proxyData, qint64& preGetProxyTime,int getNum) {
     int cnt = 0;
     proxyData.clear();
     preGetProxyTime = 0;
