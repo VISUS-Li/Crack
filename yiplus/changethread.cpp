@@ -56,20 +56,24 @@ void  changeThread::run()
             if((!loginRet && !changeRet) || token == ""){
                 cnt = 0;
                 signInAndThen();
+                msleep(1000);
             }
             if(loginRet && changeList == ""){
                 getHomePage();
+                msleep(1000);
             }
             if(loginRet && detail == ""){
                 getGoodsList();
+                msleep(1000);
             }
             if(loginRet && change == ""){
                 getGoodsInfo();
+                msleep(1000);
             }
             if(loginRet && !changeRet) {//如果账号登录了，并且没有兑换成功，开始兑换流程
                 //判断当前是否是要执行的时间
                 nowTime = QTime::currentTime();
-                if((nowTime.hour() >= 23 && nowTime.minute() >= 58 && nowTime.second() >= 00)\
+                if((nowTime.hour() >= 23 && nowTime.minute() >= 59 && nowTime.second() >= 30)\
                     || (nowTime.hour() == 00)){
                     while (1) {
                         isStartChange = true;
@@ -104,7 +108,7 @@ void  changeThread::run()
                 jsonReplay.proxyStatus.Enable = true;
             }
             CommonUtils::Instance()->WriteReplayLog(jsonReplay,userID+".txt");
-            msleep(200);
+            msleep(1000);
         }
     }
 }
