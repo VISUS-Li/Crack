@@ -75,9 +75,7 @@ void  changeThread::run()
                         isStartChange = true;
                         changeRet = changeGoods();
                         cnt++;
-
                         if( (nowTime.hour() == 00 && nowTime.minute() >= 10)) break;
-
                     }
                 }
 
