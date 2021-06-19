@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang=zh-cmn-Hans>
+    <head>
+        <meta charset=UTF-8>
+        <meta name=screen-orientation content=portrait>
+        <meta name=x5-orientation content=portrait>
+        <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,shrink-to-fit=no">
+        <title>小米有品</title>
+        <script src=//fe.res.youpin.mi-img.com/log_sdk/youpin-bridge-iife.js></script>
+        <style>
+            html,body {
+                height: 100%;
+            }
+        </style>
+        <script>
+            window.lib10Config = {
+                fastclick: false
+            };
+            (function() {
+                var docEl = document.documentElement
+                  , // scale = 1 / window.devicePixelRatio,
+                recalc = function() {
+                    var uiWidth = 1080;
+                    var clientWidth = docEl.clientWidth;
+                    if (clientWidth > 800)
+                        clientWidth = 800;
+                    docEl.style.fontSize = 100 * (clientWidth / uiWidth) + 'px';
+                    console.log(clientWidth, '<===clientWidth');
+                }
+                ;
+                // document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=device-width, initial-scale=' + scale + ', maximum-scale=' + scale + ', minimum-scale=' + scale + ', user-scalable = no, shrink-to-fit=no');
+                if (!document.addEventListener)
+                    return;
+                window.addEventListener('resize', function() {
+                    setTimeout(recalc, 300)
+                }, false);
+                document.addEventListener('DOMContentLoaded', function() {
+                    recalc()
+                    setTimeout(function() {
+                        // 修复安卓客户端获取clientWidth无效的问题
+                        recalc()
+                    }, 333)
+                }, false);
+            })();
+        </script>
+        <link rel="shortcut icon" href=//m.xiaomiyoupin.com/favicon.ico type=image/x-icon>
+        <link rel=stylesheet href=//fe.res.youpin.mi-img.com/lib10/youpin-lib10.min.css>
+        <script src="//fe.res.youpin.mi-img.com/lib10/youpin-lib10.min.js?update=66"></script>
+        <link href=css/chunk-vendors.c412edf5.css rel=preload as=style>
+        <link href=css/subscribeBuy.9b679540.css rel=preload as=style>
+        <link href=js/chunk-common.521dbf39.js rel=preload as=script>
+        <link href=js/chunk-vendors.0f30157a.js rel=preload as=script>
+        <link href=js/subscribeBuy.181e8eef.js rel=preload as=script>
+        <link href=css/chunk-vendors.c412edf5.css rel=stylesheet>
+        <link href=css/subscribeBuy.9b679540.css rel=stylesheet>
+    </head>
+    <body>
+        <noscript>
+            <strong>We're sorry but test doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+        </noscript>
+        <div id=app></div>
+        <script src=js/chunk-vendors.0f30157a.js></script>
+        <script src=js/chunk-common.521dbf39.js></script>
+        <script src=js/subscribeBuy.181e8eef.js></script>
+    </body>
+</html>
