@@ -4,12 +4,14 @@
 import random
 import requests
 import json
+import hashlib
 
 def gen_hash(actid):
-    get_server_timestamp()
+    #get_server_timestamp()
     # a = gen_act_token_str(actid, actid)
     # to_sort_char_array(a)
-
+    t = "1624547101823&306165493&"""""""",,000000000011333344445555668888::I[]aaabbcdddddddddeeeeeeeknott{{}}&K1qTCxMsHOkJID@!#FJWIPlQ5uypYZ3wnF"
+    hashmd5(t)
 
 def get_server_timestamp():
     url = "https://m.xiaomiyoupin.com/app/shopv3/timestamp"
@@ -39,4 +41,9 @@ def to_sort_char_array(string):
     return dst
 
 
-# "1624077940740&574326571&"""""""",,000000000011113333336677778899::I[]aaacccccccccccccdeeeeeknott{{}}&K1qTCxMsHOkJID@!#FJWIPlQ5uypYZ3wnF"
+def hashmd5(t):
+    out = hashlib.md5(t.encode('utf-8')).hexdigest()
+    print(out)
+    # 目标：12976A8EB453C9A3534A1842315722CB
+    return out
+
