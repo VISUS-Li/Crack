@@ -246,7 +246,7 @@
             var e, n = "", o = 32 * t.length;
             for (e = 0; e < o; e += 8)
                 n += String.fromCharCode(t[e >> 5] >>> e % 32 & 255);
-            return n
+            return n //n= "j´SÉ£SJB1W"Ë"  或 \u0012j´SÉ£SJ\u0018B1W\"Ë
         }
         function d(t) {
             var e, n = [];
@@ -266,7 +266,7 @@
             for (n = 0; n < t.length; n += 1)
                 e = t.charCodeAt(n),
                 r += o.charAt(e >>> 4 & 15) + o.charAt(15 & e);
-            return r
+            return r //r = "12976a8eb453c9a3534a1842315722cb"
         }
         function f(t) {
             return unescape(encodeURIComponent(t))
@@ -278,7 +278,7 @@
             return p(h(t))
         }
         function v(t, e, n) {
-            return g(t).toUpperCase()
+            return g(t).toUpperCase() //t=1624547101823&306165493&"""""""",,000000000011333344445555668888::I[]aaabbcdddddddddeeeeeeeknott{{}}&K1qTCxMsHOkJID@!#FJWIPlQ5uypYZ3wnF   //待计算hash的值
         }
         t.exports = {
             hash: v
@@ -300,6 +300,7 @@
         }
         document.addEventListener("message", (function(t) {
             var e = JSON.parse(t.data);
+            //e.result = "K1qTCxMsHOkJID@!#FJWIPlQ5uypYZ3wnF"
             "subBuySalt" === e.id && e.result && (m = e.result)
         })),
         setTimeout(d, 300),
@@ -308,13 +309,13 @@
             c: function(t) {
                 var e = c["a"].getServerTime()
                   , n = Math.round(1e9 * Math.random())
-                  //m = K1qTCxMm9L2sHOkPlQ5uypYZ3wnFgXhN，似乎是会变的
+                  //m = K1qTCxMm9L2sHOkPlQ5uypYZ3wnFgXhN 或者 K1qTCxMsHOkJID@!#FJWIPlQ5uypYZ3wnF 似乎是不会变的，后者比较多
                   //e = 服务器时间
                   //n = 随机数，四舍五入
                   //l.create(t)的返回值固定（actId不变的话）："""""""",,00000000001144555566777777889999::I[]aaabbcccccccdddeeeffknott{{}}
                   //最终传入hash函数的参数：1621167898797&871993980&"""""""",,00000000001144555566777777889999::I[]aaabbcccccccdddeeeffknott{{}}&K1qTCxMm9L2sHOkPlQ5uypYZ3wnFgXhN
                   //采用e&n&l.create(t)&m
-                  , o = a.a.hash([e, n, l.create(t), m].join("&"))
+                  , o = a.a.hash([e, n, l.create(t), m].join("&")) // o = 12976A8EB453C9A3534A1842315722CB
                   , r = {};
 
                   //yp-srs:871993980 //随机数
