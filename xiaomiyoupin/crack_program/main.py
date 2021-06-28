@@ -5,6 +5,6 @@ import login
 # a = param_gen.gen_hash(actid)
 # print(a)
 dev_id = "_f1qJucbm08DiWZA"
-phone = "19160384322"
-pwd = "11111"
+phone = "19160384323"
+pwd = "miss1183989659"
 login.service_login_auth(dev_id, phone, pwd)

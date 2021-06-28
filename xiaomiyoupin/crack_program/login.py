@@ -3,11 +3,12 @@ import json
 from param_gen import hashmd5
 from urllib.parse import urlencode
 
-proxy='192.168.2.130:8888'  #本地代理
-proxies={
-    'http':'http://'+proxy,
-    'https':'https://'+proxy
-}
+# proxy='192.168.2.130:8888'  #本地代理
+# proxies={
+#     'http':'http://'+proxy,
+#     'https':'https://'+proxy
+# }
+proxies = {}
 
 def service_login(dev_id, phone):
     url = "https://account.xiaomi.com/pass/serviceLogin?_json=true&sid=miotstore"
@@ -58,5 +59,8 @@ def service_login_auth(device_id, phone, pwd):
     res = json.loads(r)
     return res
 
-# def callback_auth(svc_auth_resp):
-#
+
+def callback_auth(dev_id, phone, pwd):
+    cbauth_resp = service_login_auth(dev_id, phone, pwd)
+    ssecurity = cbauth_resp["ssecurity"]
+    nonce = cbauth_resp["nonce"]
