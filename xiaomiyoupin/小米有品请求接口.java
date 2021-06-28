@@ -254,3 +254,108 @@ Access-Control-Allow-Headers: Keep-Alive,User-Agent,X-Requested-With,If-Modified
 
 
 
+
+
+//找到登录计算hash地方：
+EasyMap easyPut = new EasyMap().easyPutOpt(ProfileRecordUtils.Area.f33207a, str).easyPut(C7341a.f32281e, CloudCoder.getMd5DigestUpperCase(str2)).easyPutOpt("sid", str4).easyPutOpt("captCode", str6).easyPutOpt(C8359d.f36485p, passwordLoginParams.countryCode).easyPut("_json", Constants.SdkSettings.VALUE_TRUE);
+//重点是
+easyPut(C7341a.f32281e, CloudCoder.getMd5DigestUpperCase(str2)) //C7341a.f32281e 值为hash
+
+//实际就是将密码计算了个MD5
+public static String getMd5DigestUpperCase(String str) {
+  return Coder.getMd5DigestUpperCase(str);
+}
+
+
+
+    public static String getMd5DigestUpperCase(String str) {
+        String dataMd5Digest;
+        if (str == null || (dataMd5Digest = getDataMd5Digest(str.getBytes())) == null) {
+            return null;
+        }
+        return dataMd5Digest.toUpperCase();
+    }
+
+    public static String getDataMd5Digest(byte[] bArr) {
+        if (bArr == null || bArr.length == 0) {
+            return null;
+        }
+        try {
+            MessageDigest instance = MessageDigest.getInstance(com.xiaomi.youpin.common.util.crypto.rc4coder.Coder.f38283b);
+            instance.update(bArr);
+            return getHexString(instance.digest());
+        } catch (Exception e) {
+            AccountLog.m30815e(TAG, "getDataMd5Digest", e);
+            return null;
+        }
+    }
+
+
+/*****1. 抢购请求*****/
+POST https://m.xiaomiyoupin.com/mtop/act/orderspike/spike HTTP/1.1
+POST https://aabbcc.com/ HTTP/1.1
+Origin: https://m.xiaomiyoupin.com
+c: 0
+yp-srs: 713239990
+Accept: application/json
+d: 47
+X-Requested-With: XMLHttpRequest
+yp-srt: 1624889049946
+User-Agent: Dalvik/2.1.0 (Linux; U; Android 8.1.0; MI 8 MIUI/8.6.18)Mobile MIOTWeex/2.0.2 (YouPin;4.15.0;0D2F912ED0CA5ECA432C98814A0F1842;0.20.1;A;49CB1FE12BE10DDE7B6D5223DFAE234879D601D3;MiAppStore;_f1qJucbm08DiWYZ;) MIOTStore/20191212 (YouPin;4.15.0;0D2F912ED0CA5ECA432C98814A0F1842;20210623194554;A;49CB1FE12BE10DDE7B6D5223DFAE234879D601D3;MiAppStore;_f1qJucbm08DiWYZ;) XiaoMi/HybridView/
+Referer: https://m.xiaomiyoupin.com/app/shop/ugg/subscribeBuy.html?actId=60d47b1ee03dd80001455baf&spmref=YouPin_A.%24Detail%24_135927.text_url.0.46852154
+yp-ss: 58A8B78C52263AB29C1E58653B433217
+Content-Type: application/json; charset=utf-8
+Content-Length: 76
+Host: aabbcc.com
+Connection: Keep-Alive
+Accept-Encoding: gzip
+Cookie: cUserId=ZeiMM6l_IW-z_hnC02EJwAfjmVk; serviceToken=CLVM8p7W9YzjqRO8sh5RcvIhEY7pdhRvztoscXyMsVRGyMiYGacqLUlrkP0iHq7Zy2WKBP8nu3Po9g6qRbFdQ87SuIx5J97MRrKK8Xwl45BKHyDzKh8q4NcHiQU5tV38lUc3gzIYG17aLlJdNqJ99Q==; youpindistinct_id=177ca648a61-02218e1695f433-6487; mjclient=YouPin; youpin_sessionid=17a52ef2107-0e03970ca411a3-64ab
+
+[{},{"actId":"60d47b1ee03dd80001455baf","token":"60d47b1ee03dd80001455baf"}]
+
+
+/*****2. 获取serverToken*****/
+GET https://shopapi.io.mi.com/app/shop/auth?d=_f1qJucbm08DiWYZ&ticket=0&pwd=0&p_ts=1624889032000&fid=0&p_lm=1&auth=ARbh4fNO62qQv1K9%2BR0oRwPlKEOom7jgxPEB8aS2Uezlnc54E1kxkmvy9D4cOHVD774R9XtWjBIGdDWscsJ%2B1pw3qR%2BCGxCt5MAsYVG7vj2ZdUYmKyMFuV70VkjX1lGOc%2Fe8ISrPSOD%2BtsFxluYhA9%2BWf8inhG5%2Bgb9xE%2B8O01c%3D&m=1&tsl=0&nonce=oUxNx%2Fz%2BbdcBnTsL&_ssign=b3uZRS4LPQUyqWumjkkzgqmchDg%3D&_userIdNeedEncrypt=true&clientSign=sgKKs95rX8FLT4Zx39udnhD1j2s%3D HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+User-Agent: Dalvik/2.1.0 (Linux; U; Android 8.1.0; MI 8 MIUI/8.6.18) APP/xiaomi.youpin APPV/300 MK/TUkgOA== PassportSDK/3.3.5 passport-ui/3.3.5 Dalvik/2.1.0 (Linux; U; Android 8.1.0; MI 8 MIUI/8.6.18)Mobile MIOTWeex/2.0.2 (YouPin;4.15.0;0D2F912ED0CA5ECA432C98814A0F1842;0.20.1;A;49CB1FE12BE10DDE7B6D5223DFAE234879D601D3;MiAppStore;_f1qJucbm08DiWYZ;) MIOTStore/20191212 (YouPin;4.15.0;0D2F912ED0CA5ECA432C98814A0F1842;20210623194554;A;49CB1FE12BE10DDE7B6D5223DFAE234879D601D3;MiAppStore;_f1qJucbm08DiWYZ;)
+Cookie: sdkVersion=accountsdk-2020.01.09; deviceId=_f1qJucbm08DiWYZ
+Host: shopapi.io.mi.com
+Connection: Keep-Alive
+Accept-Encoding: gzip
+
+
+HTTP/1.1 200 OK
+Server: nginx
+Date: Mon, 28 Jun 2021 14:03:53 GMT
+Content-Length: 0
+Connection: keep-alive
+Cache-Control: no-cache, no-store, must-revalidate
+Pragma: no-cache
+Set-Cookie: cUserId=ZeiMM6l_IW-z_hnC02EJwAfjmVk; Path=/; Domain=shopapi.io.mi.com; Expires=Tue, 29 Jun 2021 14:03:53 GMT; Max-Age=86400
+Set-Cookie: serviceToken=CLVM8p7W9YzjqRO8sh5RcvIhEY7pdhRvztoscXyMsVRGyMiYGacqLUlrkP0iHq7Zy2WKBP8nu3Po9g6qRbFdQ87SuIx5J97MRrKK8Xwl45BKHyDzKh8q4NcHiQU5tV38lUc3gzIYG17aLlJdNqJ99Q==; Path=/; Domain=shopapi.io.mi.com; Expires=Tue, 29 Jun 2021 14:03:53 GMT; Max-Age=86400; HttpOnly
+Set-Cookie: serviceToken=CLVM8p7W9YzjqRO8sh5RcvIhEY7pdhRvztoscXyMsVRGyMiYGacqLUlrkP0iHq7Zy2WKBP8nu3Po9g6qRbFdQ87SuIx5J97MRrKK8Xwl45BKHyDzKh8q4NcHiQU5tV38lUc3gzIYG17aLlJdNqJ99Q==; path=/; domain=.shopapi.io.mi.com; max-age=86400; HttpOnly
+Set-Cookie: serviceToken=CLVM8p7W9YzjqRO8sh5RcvIhEY7pdhRvztoscXyMsVRGyMiYGacqLUlrkP0iHq7Zy2WKBP8nu3Po9g6qRbFdQ87SuIx5J97MRrKK8Xwl45BKHyDzKh8q4NcHiQU5tV38lUc3gzIYG17aLlJdNqJ99Q==; path=/; domain=.xiaomiyoupin.com; max-age=86400; HttpOnly
+Set-Cookie: miotstore_serviceToken=CLVM8p7W9YzjqRO8sh5RcvIhEY7pdhRvztoscXyMsVRGyMiYGacqLUlrkP0iHq7Zy2WKBP8nu3Po9g6qRbFdQ87SuIx5J97MRrKK8Xwl45BKHyDzKh8q4NcHiQU5tV38lUc3gzIYG17aLlJdNqJ99Q==; path=/; domain=.mi.com; max-age=86400; HttpOnly
+Set-Cookie: mUserId=gyDf1rMTSNE%2BQ5zCBdJjUrSq1Z17InAuRbooGIt4m0Y%3D; path=/; domain=.mi.com; max-age=1940249033
+Set-Cookie: mUserId=gyDf1rMTSNE%2BQ5zCBdJjUrSq1Z17InAuRbooGIt4m0Y%3D; Path=/; Domain=mi.com; Expires=Thu, 26 Jun 2031 14:03:53 GMT; Max-Age=1940249033
+Set-Cookie: cUserId=ZeiMM6l_IW-z_hnC02EJwAfjmVk; Path=/; Domain=shopapi.io.mi.com; Max-Age=86400
+X-Mi-Trace: 901267d6de9e49e8a4e23794ae52899e
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Headers: DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,token
+
+
+//其中请求参数：
+d:_f1qJucbm08DiWYZ //deviceId
+ticket:0
+pwd:0
+p_ts:1624889032000 //时间戳，毫秒
+fid:0
+p_lm:1
+auth:ARbh4fNO62qQv1K9%2BR0oRwPlKEOom7jgxPEB8aS2Uezlnc54E1kxkmvy9D4cOHVD774R9XtWjBIGdDWscsJ%2B1pw3qR%2BCGxCt5MAsYVG7vj2ZdUYmKyMFuV70VkjX1lGOc%2Fe8ISrPSOD%2BtsFxluYhA9%2BWf8inhG5%2Bgb9xE%2B8O01c%3D
+m:1
+tsl:0
+nonce:oUxNx%2Fz%2BbdcBnTsL
+_ssign:b3uZRS4LPQUyqWumjkkzgqmchDg%3D
+_userIdNeedEncrypt:true
+clientSign:sgKKs95rX8FLT4Zx39udnhD1j2s%3D
