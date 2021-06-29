@@ -10,7 +10,6 @@ def gen_hash(actid):
     #get_server_timestamp()
     # a = gen_act_token_str(actid, actid)
     # to_sort_char_array(a)
-    t = "1624547101823&306165493&"""""""",,000000000011333344445555668888::I[]aaabbcdddddddddeeeeeeeknott{{}}&K1qTCxMsHOkJID@!#FJWIPlQ5uypYZ3wnF"
     hashmd5(t)
 
 def get_server_timestamp():
@@ -42,8 +41,6 @@ def to_sort_char_array(string):
 
 
 def hashmd5(t):
-    out = hashlib.md5(t.encode('utf-8')).hexdigest()
-    print(out)
-    # 目标：12976A8EB453C9A3534A1842315722CB
+    out = hashlib.md5(t.encode('utf8')).hexdigest()
+    out = out.upper()
     return out
-

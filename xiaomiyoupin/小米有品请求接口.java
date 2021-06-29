@@ -314,6 +314,7 @@ Cookie: cUserId=ZeiMM6l_IW-z_hnC02EJwAfjmVk; serviceToken=CLVM8p7W9YzjqRO8sh5Rcv
 [{},{"actId":"60d47b1ee03dd80001455baf","token":"60d47b1ee03dd80001455baf"}]
 
 
+
 /*****2. 获取serverToken*****/
 GET https://shopapi.io.mi.com/app/shop/auth?d=_f1qJucbm08DiWYZ&ticket=0&pwd=0&p_ts=1624889032000&fid=0&p_lm=1&auth=ARbh4fNO62qQv1K9%2BR0oRwPlKEOom7jgxPEB8aS2Uezlnc54E1kxkmvy9D4cOHVD774R9XtWjBIGdDWscsJ%2B1pw3qR%2BCGxCt5MAsYVG7vj2ZdUYmKyMFuV70VkjX1lGOc%2Fe8ISrPSOD%2BtsFxluYhA9%2BWf8inhG5%2Bgb9xE%2B8O01c%3D&m=1&tsl=0&nonce=oUxNx%2Fz%2BbdcBnTsL&_ssign=b3uZRS4LPQUyqWumjkkzgqmchDg%3D&_userIdNeedEncrypt=true&clientSign=sgKKs95rX8FLT4Zx39udnhD1j2s%3D HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
@@ -346,6 +347,7 @@ Access-Control-Allow-Headers: DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modi
 
 
 //其中请求参数：
+//整个请求参数是通过 https://account.xiaomi.com/pass/serviceLoginAuth2请求返回的location得到的
 d:_f1qJucbm08DiWYZ //deviceId
 ticket:0
 pwd:0
@@ -357,5 +359,136 @@ m:1
 tsl:0
 nonce:oUxNx%2Fz%2BbdcBnTsL
 _ssign:b3uZRS4LPQUyqWumjkkzgqmchDg%3D
+//但_userIdNeedEncrypt和clientSign是通过app计算得到的
 _userIdNeedEncrypt:true
 clientSign:sgKKs95rX8FLT4Zx39udnhD1j2s%3D
+
+
+
+/*****3. 获取location*****/
+POST https://account.xiaomi.com/pass/serviceLoginAuth2 HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+User-Agent: Dalvik/2.1.0 (Linux; U; Android 8.1.0; MI 8 MIUI/8.6.18) APP/xiaomi.youpin APPV/300 MK/TUkgOA== PassportSDK/3.3.5 passport-ui/3.3.5 Dalvik/2.1.0 (Linux; U; Android 8.1.0; MI 8 MIUI/8.6.18)Mobile MIOTWeex/2.0.2 (YouPin;4.15.0;0D2F912ED0CA5ECA432C98814A0F1842;0.20.1;A;49CB1FE12BE10DDE7B6D5223DFAE234879D601D3;MiAppStore;_f1qJucbm08DiWYZ;) MIOTStore/20191212 (YouPin;4.15.0;0D2F912ED0CA5ECA432C98814A0F1842;20210623194554;A;49CB1FE12BE10DDE7B6D5223DFAE234879D601D3;MiAppStore;_f1qJucbm08DiWYZ;)
+Cookie: deviceId=_f1qJucbm08DiWYZ; sdkVersion=accountsdk-2020.01.09
+Host: account.xiaomi.com
+Connection: Keep-Alive
+Accept-Encoding: gzip
+Content-Length: 236
+
+cc=%2B86&qs=%253F_json%253Dtrue%2526sid%253Dmiotstore&callback=https%3A%2F%2Fshopapi.io.mi.com%2Fapp%2Fshop%2Fauth&_json=true&_sign=SJfB4xfSC65cZDh9dl74zrvZAXg%3D&user=%2B8619160384323&hash=2F2A33BCEF26CAF6CA6EA55E6158B061&sid=miotstore
+
+//其中请求体格式化后：
+cc:+86 //手机区号
+qs:%3F_json%3Dtrue%26sid%3Dmiotstore  //解码后是：?_json=true&sid=miotstore，是固定的，通过请求 https://account.xiaomi.com/pass/serviceLogin?_json=true&sid=miotstore 获得
+callback:https://shopapi.io.mi.com/app/shop/auth //同样通过请求 https://account.xiaomi.com/pass/serviceLogin?_json=true&sid=miotstore 获得
+_json:true
+_sign:SJfB4xfSC65cZDh9dl74zrvZAXg= //同样通过请求 https://account.xiaomi.com/pass/serviceLogin?_json=true&sid=miotstore 获得
+user:+8619160384323 //电话号码
+hash:2F2A33BCEF26CAF6CA6EA55E6158B061 //密码的md5计算值
+sid:miotstore //同样通过 https://account.xiaomi.com/pass/serviceLogin?_json=true&sid=miotstore 获得
+
+//response
+HTTP/1.1 200 OK
+Server: Server
+Date: Mon, 28 Jun 2021 14:03:52 GMT
+Content-Type: application/json; charset=UTF-8
+Connection: keep-alive
+Set-Cookie: pass_ua=web; Domain=account.xiaomi.com; Max-Age=94608000; Path=/; Expires=Thu, 27-Jun-2024 14:03:52 GMT
+Set-Cookie: passToken=V1:c5UlVKfRgwcA/ltHgc/OylYT599WTjnRz7sHGhuB8ARIkPAZfF64o1IkxPH/AVAMmgUExIWRIyRgoWKphN7rl1ZEiQei+VReU73j6pYYnhbKeJWwFh60Nempsu4ZgPGw81mEz2OIGChTSe94x7ksnwddeaOs8MtMHy0E+IATaFOCeSt191fGevq15PPkeAm748H1THfJ+CnDnzTjWJIo7MRsp/ZcSN7GUxkzpHQe40QsT6HB6+DQ2q2xuViwpDgeyUyhaUm9ls+F4O0xhBDShBwJbP+HENLHCP5xYbd3kCo=; Domain=.account.xiaomi.com; Path=/; HttpOnly
+Set-Cookie: cUserId=ZeiMM6l_IW-z_hnC02EJwAfjmVk; Domain=account.xiaomi.com; Path=/
+Set-Cookie: userId=2513543207; Domain=.xiaomi.com; Max-Age=1; Path=/; Expires=Mon, 28-Jun-2021 14:03:53 GMT
+Set-Cookie: cUserId=ZeiMM6l_IW-z_hnC02EJwAfjmVk; Domain=.xiaomi.com; Path=/
+Set-Cookie: userId=2513543207; Domain=.account.xiaomi.com; Path=/
+Set-Cookie: pExpireTime=0; Domain=account.xiaomi.com; Path=/
+Set-Cookie: passInfo=login-end; Domain=account.xiaomi.com; Path=/
+Set-Cookie: uLocale=zh_CN; domain=.xiaomi.com; path=/; expires=Tue, 13-Jul-2021 14:03:52 GMT
+X-Frame-Options: SAMEORIGIN
+extension-pragma: {"nonce":5895409578423508992,"ssecurity":"/ThpRrQMKHoZh5E5dJPsrg==","psecurity":"dr4SeOBfeaiXtPJzFxB1qA=="}
+Content-Language: en-US
+Cache-Control: no-cache
+Strict-Transport-Security: max-age=600
+Content-Length: 1026
+
+&&&START&&&{"qs":"%3F_json%3Dtrue%26sid%3Dmiotstore","ssecurity":"/ThpRrQMKHoZh5E5dJPsrg==","code":0,"passToken":"V1:c5UlVKfRgwcA/ltHgc/OylYT599WTjnRz7sHGhuB8ARIkPAZfF64o1IkxPH/AVAMmgUExIWRIyRgoWKphN7rl1ZEiQei+VReU73j6pYYnhbKeJWwFh60Nempsu4ZgPGw81mEz2OIGChTSe94x7ksnwddeaOs8MtMHy0E+IATaFOCeSt191fGevq15PPkeAm748H1THfJ+CnDnzTjWJIo7MRsp/ZcSN7GUxkzpHQe40QsT6HB6+DQ2q2xuViwpDgeyUyhaUm9ls+F4O0xhBDShBwJbP+HENLHCP5xYbd3kCo=","description":"成功","securityStatus":0,"nonce":5895409578423508992,"userId":2513543207,"cUserId":"ZeiMM6l_IW-z_hnC02EJwAfjmVk","result":"ok","psecurity":"dr4SeOBfeaiXtPJzFxB1qA==","captchaUrl":null,"location":"https://shopapi.io.mi.com/app/shop/auth?d=_f1qJucbm08DiWYZ&ticket=0&pwd=1&p_ts=1624889032000&fid=0&p_lm=1&auth=YL0czlbf9%2B%2FHqtbfMwoZTvbDQwL3hWUxV0I%2BPhS7lc0NWqodOocaSlQCSSbhjI9aQtpk%2BDfhjxl%2FNKnyp60NYxI0s4JhviyhalQkZZTbtQb83XgF%2Fhc0bY41MbWyraMxzCfHqsf4nqqhxUHMCRgD2eq83dwxvEgeopAAZntvkIM%3D&m=1&tsl=0&nonce=S077jscjOwgBnTsL&_ssign=Gu7zYyLRll11dFp1sXsx0eATJAE%3D","pwd":1,"desc":"成功"}
+
+//其中返回值格式化后：
+{
+    "qs": "%3F_json%3Dtrue%26sid%3Dmiotstore",
+    "ssecurity": "/ThpRrQMKHoZh5E5dJPsrg==",
+    "code": 0,
+    "passToken": "V1:c5UlVKfRgwcA/ltHgc/OylYT599WTjnRz7sHGhuB8ARIkPAZfF64o1IkxPH/AVAMmgUExIWRIyRgoWKphN7rl1ZEiQei+VReU73j6pYYnhbKeJWwFh60Nempsu4ZgPGw81mEz2OIGChTSe94x7ksnwddeaOs8MtMHy0E+IATaFOCeSt191fGevq15PPkeAm748H1THfJ+CnDnzTjWJIo7MRsp/ZcSN7GUxkzpHQe40QsT6HB6+DQ2q2xuViwpDgeyUyhaUm9ls+F4O0xhBDShBwJbP+HENLHCP5xYbd3kCo=",
+    "description": "成功",
+    "securityStatus": 0,
+    "nonce": 5895409578423508992,
+    "userId": 2513543207,
+    "cUserId": "ZeiMM6l_IW-z_hnC02EJwAfjmVk",
+    "result": "ok",
+    "psecurity": "dr4SeOBfeaiXtPJzFxB1qA==",
+    "captchaUrl": null,
+    "location": "https://shopapi.io.mi.com/app/shop/auth?d=_f1qJucbm08DiWYZ&ticket=0&pwd=1&p_ts=1624889032000&fid=0&p_lm=1&auth=YL0czlbf9%2B%2FHqtbfMwoZTvbDQwL3hWUxV0I%2BPhS7lc0NWqodOocaSlQCSSbhjI9aQtpk%2BDfhjxl%2FNKnyp60NYxI0s4JhviyhalQkZZTbtQb83XgF%2Fhc0bY41MbWyraMxzCfHqsf4nqqhxUHMCRgD2eq83dwxvEgeopAAZntvkIM%3D&m=1&tsl=0&nonce=S077jscjOwgBnTsL&_ssign=Gu7zYyLRll11dFp1sXsx0eATJAE%3D",
+    "pwd": 1,
+    "desc": "成功"
+}
+
+/*****4. 获得callback等*****/
+GET https://account.xiaomi.com/pass/serviceLogin?_json=true&sid=miotstore HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+User-Agent: Dalvik/2.1.0 (Linux; U; Android 8.1.0; MI 8 MIUI/8.6.18) APP/xiaomi.youpin APPV/300 MK/TUkgOA== PassportSDK/3.3.5 passport-ui/3.3.5 Dalvik/2.1.0 (Linux; U; Android 8.1.0; MI 8 MIUI/8.6.18)Mobile MIOTWeex/2.0.2 (YouPin;4.15.0;0D2F912ED0CA5ECA432C98814A0F1842;0.20.1;A;49CB1FE12BE10DDE7B6D5223DFAE234879D601D3;MiAppStore;_f1qJucbm08DiWYZ;) MIOTStore/20191212 (YouPin;4.15.0;0D2F912ED0CA5ECA432C98814A0F1842;20210623194554;A;49CB1FE12BE10DDE7B6D5223DFAE234879D601D3;MiAppStore;_f1qJucbm08DiWYZ;)
+Cookie: userId=+8619160384323; deviceId=_f1qJucbm08DiWYZ; sdkVersion=accountsdk-2020.01.09
+Host: account.xiaomi.com
+Connection: Keep-Alive
+Accept-Encoding: gzip
+
+//response
+HTTP/1.1 200 OK
+Server: Server
+Date: Mon, 28 Jun 2021 14:03:51 GMT
+Content-Type: application/json; charset=UTF-8
+Connection: keep-alive
+Set-Cookie: pass_ua=web; Domain=account.xiaomi.com; Max-Age=94608000; Path=/; Expires=Thu, 27-Jun-2024 14:03:51 GMT
+Set-Cookie: userId=EXPIRED; Domain=.xiaomi.com; Max-Age=0; Path=/pass/auth; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: cUserId=EXPIRED; Domain=account.xiaomi.com; Max-Age=0; Path=/; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: serviceToken=EXPIRED; Domain=.xiaomi.com; Max-Age=0; Path=/; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: serviceToken=EXPIRED; Max-Age=0; Path=/; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: serviceToken=EXPIRED; Domain=.xiaomi.com; Max-Age=0; Path=/pass/auth; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: sns_type=EXPIRED; Domain=.xiaomi.com; Max-Age=0; Path=""; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: passToken=EXPIRED; Max-Age=0; Path=/; Secure; HttpOnly; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: cUserId=EXPIRED; Domain=account.xiaomi.com; Max-Age=0; Path=/pass/auth; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: cUserId=EXPIRED; Domain=.xiaomi.com; Max-Age=0; Path=/pass/auth; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: etao_qs=EXPIRED; Domain=account.xiaomi.com; Max-Age=0; Path=""; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: userId=EXPIRED; Domain=account.xiaomi.com; Max-Age=0; Path=/pass/auth; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: cUserId=EXPIRED; Max-Age=0; Path=/; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: userId=EXPIRED; Domain=.xiaomi.com; Max-Age=0; Path=/; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: passToken=EXPIRED; Domain=account.xiaomi.com; Max-Age=0; Path=/; Secure; HttpOnly; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: cUserId=EXPIRED; Domain=.xiaomi.com; Max-Age=0; Path=/; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: serviceToken=EXPIRED; Domain=account.xiaomi.com; Max-Age=0; Path=/pass/auth; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: userId=EXPIRED; Max-Age=0; Path=/; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: serviceToken=EXPIRED; Domain=account.xiaomi.com; Max-Age=0; Path=/; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: continue=EXPIRED; Max-Age=0; Path=/; Expires=Thu, 01-Jan-1970 08:00:10 GMT
+Set-Cookie: theme=EXPIRED; domain=account.xiaomi.com; path=/; expires=Thu, 01-Dec-1994 16:00:00 GMT
+Set-Cookie: uLocale=zh_CN; domain=.xiaomi.com; path=/; expires=Tue, 13-Jul-2021 14:03:51 GMT
+Set-Cookie: theme=EXPIRED; domain=account.xiaomi.com; path=/; expires=Thu, 01-Dec-1994 16:00:00 GMT
+X-Frame-Options: SAMEORIGIN
+Content-Language: en-US
+Cache-Control: no-cache
+Strict-Transport-Security: max-age=600
+Content-Length: 405
+
+&&&START&&&{"serviceParam":"{\"checkSafePhone\":false,\"checkSafeAddress\":false,\"lsrp_score\":0.0}","qs":"%3F_json%3Dtrue%26sid%3Dmiotstore","code":70016,"description":"登录验证失败","securityStatus":0,"_sign":"SJfB4xfSC65cZDh9dl74zrvZAXg=","sid":"miotstore","result":"error","captchaUrl":null,"callback":"https://shopapi.io.mi.com/app/shop/auth","location":"","pwd":0,"desc":"登录验证失败"}
+
+//其中返回值格式化后：
+{
+    "serviceParam": "{\"checkSafePhone\":false,\"checkSafeAddress\":false,\"lsrp_score\":0.0}",
+    "qs": "%3F_json%3Dtrue%26sid%3Dmiotstore",
+    "code": 70016,
+    "description": "登录验证失败",
+    "securityStatus": 0,
+    "_sign": "SJfB4xfSC65cZDh9dl74zrvZAXg=",
+    "sid": "miotstore",
+    "result": "error",
+    "captchaUrl": null,
+    "callback": "https://shopapi.io.mi.com/app/shop/auth",
+    "location": "",
+    "pwd": 0,
+    "desc": "登录验证失败"
+}
