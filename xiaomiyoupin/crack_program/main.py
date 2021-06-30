@@ -1,5 +1,8 @@
+import re
+
 import param_gen
 import login
+import math
 # # "[{},{"actId":"60ccc3e1c9e77c000130ac38","token":"60ccc3e1c9e77c000130ac38"}]"
 # actid = "60ccc3e1c9e77c000130ac38"
 # a = param_gen.gen_hash(actid)
@@ -7,4 +10,4 @@ import login
 dev_id = "_f1qJucbm08DiWZA"
 phone = "19160384323"
 pwd = "miss1183989659"
-login.service_login_auth(dev_id, phone, pwd)
+login.callback_auth(dev_id, phone, pwd)

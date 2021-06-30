@@ -1,5 +1,7 @@
 import requests
 import json
+
+import param_gen
 from param_gen import hashmd5
 from urllib.parse import urlencode
 
@@ -59,8 +61,19 @@ def service_login_auth(device_id, phone, pwd):
     res = json.loads(r)
     return res
 
-
+#登录获取serviceToken
 def callback_auth(dev_id, phone, pwd):
     cbauth_resp = service_login_auth(dev_id, phone, pwd)
     ssecurity = cbauth_resp["ssecurity"]
-    nonce = cbauth_resp["nonce"]
+    nonce = int(float(cbauth_resp["nonce"]))
+    query = "nonce=" + str(nonce) + "&" + ssecurity
+    clientSign = param_gen.hashsha1(query)
+    t = {
+        "clientSign": clientSign
+    }
+    e = urlencode(t)
+    url = cbauth_resp["location"] + "&_userIdNeedEncrypt=true&" + e
+    resp = requests.get(url)
+    r = resp.text[11:]
+    srvtoken = resp.cookies.get("serviceToken")
+    return srvtoken

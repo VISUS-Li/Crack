@@ -1,6 +1,5 @@
 # 生成请求的参数
-
-
+import base64
 import random
 import requests
 import json
@@ -43,4 +42,11 @@ def to_sort_char_array(string):
 def hashmd5(t):
     out = hashlib.md5(t.encode('utf8')).hexdigest()
     out = out.upper()
+    return out
+
+def hashsha1(t):
+    out = hashlib.sha1(t.encode('utf-8')).digest()
+    out = base64.encodebytes(out)
+    out = out.decode('utf-8')
+    out = out[0:len(out)-1]
     return out
