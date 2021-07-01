@@ -5,11 +5,19 @@ import requests
 import json
 import hashlib
 
-def gen_hash(actid):
-    #get_server_timestamp()
-    # a = gen_act_token_str(actid, actid)
-    # to_sort_char_array(a)
-    hashmd5(t)
+def get_param(actid):
+    r = gen_9num_random()
+    t = get_server_timestamp()
+    h = gen_hash(actid, t, r)
+    return r, t, h
+
+def gen_hash(actid, t, r):
+    a = gen_act_token_str(actid, actid)
+    s = to_sort_char_array(a)
+    salt = "K1qTCxMsHOkJID@!#FJWIPlQ5uypYZ3wnF"
+    d = str(t) + "&" +str(r) + "&" + s + "&" + salt
+    h = hashmd5(d)
+    return h
 
 def get_server_timestamp():
     url = "https://m.xiaomiyoupin.com/app/shopv3/timestamp"

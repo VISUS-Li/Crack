@@ -76,4 +76,5 @@ def callback_auth(dev_id, phone, pwd):
     resp = requests.get(url)
     r = resp.text[11:]
     srvtoken = resp.cookies.get("serviceToken")
-    return srvtoken
+    cUserId = resp.cookies.get("cUserId")
+    return srvtoken, cUserId
