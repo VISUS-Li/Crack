@@ -23,20 +23,31 @@ youpinsession = "179790965b0-0b0a4d1d5ee787-6677"
 serviceToken = ""
 cUserId = ""
 
+
 def job():
     global serviceToken
     global cUserId
     if serviceToken == "":
         serviceToken, cUserId = login.callback_auth(dev_id, phone, pwd)
         count = 0
+    #tstr = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+    tstr = '2021-07-02 09:59:59.781286'
+    t = float(time.mktime(time.strptime(tstr, '%Y-%m-%d %H:%M:%S.%f')))
     while True:
-        spike.doSpike(dev_id, phone, pwd, youpindistinct, youpinsession, serviceToken, cUserId)
+        now = time.time()
+        if now > t:
+            print(u"到点")
+            break
+    while True:
+        spike.doSpike(youpindistinct, youpinsession, serviceToken, cUserId)
         count += 1
         time.sleep(0.1)
         if count > 20:
             break
 
-scheduler = BlockingScheduler()
-scheduler.add_job(job, 'cron', hour=9, minute=59, second=59)
-print("start timer")
-scheduler.start()
+# scheduler = BlockingScheduler()
+# scheduler.add_job(job, 'cron', hour=9, minute=59, second=10)
+# print("start timer")
+# scheduler.start()
+
+job()
