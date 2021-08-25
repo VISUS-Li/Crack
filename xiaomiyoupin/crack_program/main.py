@@ -1,6 +1,8 @@
 import _thread
 import re
 import time
+import threading
+import pandas as pd
 
 import numpy as np
 
@@ -8,7 +10,6 @@ import param_gen
 import login
 import math
 import spike
-from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import datetime
 
 # # "[{},{"actId":"60ccc3e1c9e77c000130ac38","token":"60ccc3e1c9e77c000130ac38"}]"
@@ -25,7 +26,7 @@ youpinsession = "179790965b0-0b0a4d1d5ee787-6677"
 
 serviceToken = ""
 cUserId = ""
-
+startTime = '2021-08-23 09:59:59.781286'
 
 class Account:
     def __init__(self, phone, pwd, dev_id):
@@ -36,67 +37,70 @@ class Account:
 
 
     def job(self):
-        global serviceToken
         global cUserId
-        if serviceToken == "":
+        try:
             serviceToken, cUserId = login.callback_auth(self.dev_id, self.phone, self.pwd)
             count = 0
-        # tstr = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-        tstr = '2021-08-23 09:59:59.781286'
-        t = float(time.mktime(time.strptime(tstr, '%Y-%m-%d %H:%M:%S.%f')))
-        while True:
-            now = time.time()
-            if now > t:
-                print(u"到点")
-                break
-        while True:
-            spike.doSpike(youpindistinct, youpinsession, serviceToken, cUserId)
-            count += 1
-            time.sleep(0.1)
-            if count > 20:
-                break
+            t = float(time.mktime(time.strptime(startTime, '%Y-%m-%d %H:%M:%S.%f')))
+            while True:
+                now = time.time()
+                if now > t:
+                    print(u"到点")
+                    break
+            while True:
+                spike.doSpike(youpindistinct, youpinsession, serviceToken, cUserId, self.phone)
+                count += 1
+                time.sleep(0.1)
+                if count > 20:
+                    break
+        except:
+            print()
 
 
-def job(phone, pwd, dev_id):
-        global serviceToken
-        global cUserId
-        if serviceToken == "":
-            serviceToken, cUserId = login.callback_auth(dev_id, phone, pwd)
-            count = 0
-        # tstr = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-        tstr = '2021-08-24 09:59:59.781286'
-        t = float(time.mktime(time.strptime(tstr, '%Y-%m-%d %H:%M:%S.%f')))
-        while True:
-            now = time.time()
-            if now > t:
-                print(u"到点")
-                break
-        while True:
-            spike.doSpike(youpindistinct, youpinsession, serviceToken, cUserId)
-            count += 1
-            time.sleep(0.1)
-            if count > 20:
-                break
-# scheduler = BlockingScheduler()
-# scheduler.add_job(job, 'cron', hour=9, minute=59, second=10)
-# print("start timer")
-# scheduler.start()
+    def order(self):
+        try:
+            _thread.start_new_thread(spike.doOrder, (self.dev_id,  self.phone, self.pwd, youpindistinct, youpinsession))
+        except:
+            print("预约创建线程失败")
 
-try:
-    _thread.start_new_thread(job, ("18875146084", "Ly080330..", "_f1qJucbm08DiWZA"))
-    _thread.start_new_thread(job,("19160384323", "miss1183989659", "_f1qJucbm08DiWZA"))
-except:
-    print("创建线程失败")
 
+def read_account(file):
+    accounts = []
+    try:
+        index = 1
+        global startTime
+        with open(file, newline='\n') as f:
+            for line in f:
+                if index == 1:
+                    startTime = line.replace('\r\n', '')
+                    index += 1
+                    continue
+                index += 1
+                s = line.split("--")
+                if "#" in s[0]:
+                    continue
+                acc = Account(s[0], s[1], s[2].replace('\r\n', ''))
+                accounts.append(acc)
+                pass
+    except IndexError as arg:
+        print("读取文件失败:", arg)
+    print(accounts[:])
+    return accounts
+
+accounts = read_account("acc.txt")
+threads = []
+for acc in accounts:
+    t = threading.Thread(target=acc.job)
+    t.setDaemon(True)
+    t.start()
+    #acc.order()
+    # try:
+    #     _thread.start_new_thread(acc.spike())
+    # except:
+    #     print("抢购创建线程失败")
+
+ # for t in threads:
+ #        t.setDaemon(True)
+ #        t.start()
 while 1:
     pass
-#x = Account("19160384323", "miss1183989659", "_f1qJucbm08DiWZA")
-
-
-#
-# fp = open("acc.txt", "rt", encoding="UTF-8")
-# lines = fp.readlines()
-# lineCount = len(lines)
-# dataArr = np.zeros(lineCount)
-
-#spike.doOrder(dev_id, phone, pwd, youpindistinct, youpinsession)

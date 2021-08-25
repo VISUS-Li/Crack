@@ -65,6 +65,7 @@ def service_login_auth(device_id, phone, pwd):
 
 # 登录获取serviceToken
 def callback_auth(dev_id, phone, pwd):
+    cbauth_resp = ""
     try:
         cbauth_resp = service_login_auth(dev_id, phone, pwd)
         ssecurity = cbauth_resp["ssecurity"]
@@ -82,4 +83,4 @@ def callback_auth(dev_id, phone, pwd):
         cUserId = resp.cookies.get("cUserId")
         return srvtoken, cUserId
     except:
-        print(phone, "登录失败")
+        print(phone, "登录失败", cbauth_resp)
