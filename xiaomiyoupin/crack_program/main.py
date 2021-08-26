@@ -28,13 +28,15 @@ serviceToken = ""
 cUserId = ""
 startTime = '2021-08-23 09:59:59.781286'
 
-class Account:
+class Account(threading.Thread):
     def __init__(self, phone, pwd, dev_id):
+        threading.Thread.__init__(self)
         self.phone = phone
         self.pwd = pwd
         self.dev_id = dev_id
 
-
+    def run(self):
+        self.job()
 
     def job(self):
         global cUserId
@@ -44,9 +46,11 @@ class Account:
             t = float(time.mktime(time.strptime(startTime, '%Y-%m-%d %H:%M:%S.%f')))
             while True:
                 now = time.time()
+                print(phone, "在等待\n")
                 if now > t:
-                    print(u"到点")
+                    print(u"到点\n")
                     break
+                time.sleep(1)
             while True:
                 spike.doSpike(youpindistinct, youpinsession, serviceToken, cUserId, self.phone)
                 count += 1
@@ -84,23 +88,22 @@ def read_account(file):
                 pass
     except IndexError as arg:
         print("读取文件失败:", arg)
-    print(accounts[:])
     return accounts
 
 accounts = read_account("acc.txt")
 threads = []
 for acc in accounts:
-    t = threading.Thread(target=acc.job)
-    t.setDaemon(True)
-    t.start()
+    acc.start()
+    # t = threading.Thread(target=acc.job)
+    # t.setDaemon(True)
+    # t.start()
     #acc.order()
     # try:
     #     _thread.start_new_thread(acc.spike())
     # except:
     #     print("抢购创建线程失败")
 
- # for t in threads:
- #        t.setDaemon(True)
- #        t.start()
+for t in accounts:
+    t.join()
 while 1:
     pass
