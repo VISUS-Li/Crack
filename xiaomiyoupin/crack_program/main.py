@@ -39,7 +39,6 @@ class Account(threading.Thread):
         self.job()
 
     def job(self):
-        global cUserId
         try:
             serviceToken, cUserId = login.callback_auth(self.dev_id, self.phone, self.pwd)
             count = 0
@@ -94,16 +93,8 @@ accounts = read_account("acc.txt")
 threads = []
 for acc in accounts:
     acc.start()
-    # t = threading.Thread(target=acc.job)
-    # t.setDaemon(True)
-    # t.start()
-    #acc.order()
-    # try:
-    #     _thread.start_new_thread(acc.spike())
-    # except:
-    #     print("抢购创建线程失败")
 
-for t in accounts:
-    t.join()
+# for t in accounts:
+#     t.order()
 while 1:
     pass
