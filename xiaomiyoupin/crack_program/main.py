@@ -1,10 +1,8 @@
 import _thread
-import re
+import sys
 import time
 import threading
-import pandas as pd
 
-import numpy as np
 
 import param_gen
 import login
@@ -12,10 +10,7 @@ import math
 import spike
 from datetime import datetime
 
-# # "[{},{"actId":"60ccc3e1c9e77c000130ac38","token":"60ccc3e1c9e77c000130ac38"}]"
-# actid = "60ccc3e1c9e77c000130ac38"
-# a = param_gen.gen_hash(actid)
-# print(a)
+
 dev_id = "_f1qJucbm08DiWZA"
 phone = "19160384323"
 pwd = "miss1183989659"
@@ -24,9 +19,9 @@ youpinsession = "179790965b0-0b0a4d1d5ee787-6677"
 # login.callback_auth(dev_id, phone, pwd)
 # spike.doOrder(dev_id, phone, pwd, youpindistinct, youpinsession)
 
-serviceToken = ""
-cUserId = ""
-startTime = '2021-08-23 09:59:59.781286'
+# serviceToken = ""
+# cUserId = ""
+# startTime = '2021-08-23 09:59:59.781286'
 
 class Account(threading.Thread):
     def __init__(self, phone, pwd, dev_id):
@@ -40,12 +35,13 @@ class Account(threading.Thread):
 
     def job(self):
         try:
+            print("线程ID：", threading.current_thread().ident)
             serviceToken, cUserId = login.callback_auth(self.dev_id, self.phone, self.pwd)
             count = 0
             t = float(time.mktime(time.strptime(startTime, '%Y-%m-%d %H:%M:%S.%f')))
             while True:
                 now = time.time()
-                print(phone, "在等待\n")
+                print(self.phone, "等待开始\n")
                 if now > t:
                     print(u"到点\n")
                     break
@@ -62,7 +58,7 @@ class Account(threading.Thread):
 
     def order(self):
         try:
-            _thread.start_new_thread(spike.doOrder, (self.dev_id,  self.phone, self.pwd, youpindistinct, youpinsession))
+            spike.doOrder(self.dev_id,  self.phone, self.pwd, youpindistinct, youpinsession)
         except:
             print("预约创建线程失败")
 
@@ -89,12 +85,29 @@ def read_account(file):
         print("读取文件失败:", arg)
     return accounts
 
-accounts = read_account("acc.txt")
-threads = []
-for acc in accounts:
-    acc.start()
 
-# for t in accounts:
-#     t.order()
-while 1:
-    pass
+if __name__ == '__main__':
+    str = """
+    小米有品抢购 1.0
+    功能列表：
+    1.预约
+    2.抢购
+    """
+    print(str)
+    accounts = read_account("acc.txt")
+    code = input("请选择：")
+    if code == '1':
+
+        for t in accounts:
+            t.order()
+
+    elif code == '2':
+        threads = []
+        for acc in accounts:
+            acc.start()
+            threads.append(acc)
+        for t in threads:
+            t.join()
+    else:
+        print("没有此功能")
+        sys.exit(1)
